@@ -33,3 +33,29 @@ htmlcov/
 
 # Docker
 docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite3
+
+# Storage
+minio-data/
+uploads/
+
+# SSL/TLS
+*.pem
+*.key
+*.crt
+ssl/
+
+# Alembic
+alembic/versions/__pycache__/
+
+# Node
+.npm/
+.eslintcache
+
+# Misc
+*.bak
+*.tmp
+.cache/
