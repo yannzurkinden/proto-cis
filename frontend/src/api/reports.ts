@@ -3,7 +3,7 @@ import apiClient from './client'
 export const reportsApi = {
   generateBeneficiarySummary: async (beneficiaryId: number): Promise<Blob> => {
     const response = await apiClient.get(
-      `/reports/beneficiary-summary/${beneficiaryId}`,
+      `/reports/beneficiary/${beneficiaryId}/summary`,
       { responseType: 'blob' }
     )
     return response.data
@@ -38,7 +38,7 @@ export const reportsApi = {
     date_from: string
     date_to: string
   }): Promise<Blob> => {
-    const response = await apiClient.get('/reports/absence-stats', {
+    const response = await apiClient.get('/reports/absenteeism', {
       params,
       responseType: 'blob',
     })

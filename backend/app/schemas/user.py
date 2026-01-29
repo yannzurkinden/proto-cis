@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 class UserBase(BaseModel):
     """Base user schema."""
 
-    email: EmailStr
+    email: str
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
     role: Literal["ADMIN", "RUA", "RES", "MSP", "CONSULT"] = "MSP"
@@ -25,7 +25,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     """Schema for updating a user."""
 
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     role: Optional[Literal["ADMIN", "RUA", "RES", "MSP", "CONSULT"]] = None
@@ -78,7 +78,7 @@ class UserMeResponse(BaseModel):
 class LoginRequest(BaseModel):
     """Schema for login request."""
 
-    email: EmailStr
+    email: str
     password: str
 
 
@@ -124,4 +124,4 @@ class PasswordReset(BaseModel):
 class ForgotPassword(BaseModel):
     """Schema for forgot password request."""
 
-    email: EmailStr
+    email: str

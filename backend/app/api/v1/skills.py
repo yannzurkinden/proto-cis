@@ -37,7 +37,7 @@ async def list_skills(
 ):
     """List all reference skills."""
     skill_repo = SkillRepository(db)
-    skills = await skill_repo.get_all_skills(active_only=active_only)
+    skills = await skill_repo.get_all_active()
     return [SkillResponse.model_validate(s) for s in skills]
 
 
@@ -49,7 +49,7 @@ async def create_skill(
 ):
     """Create a new reference skill."""
     skill_repo = SkillRepository(db)
-    skill = await skill_repo.create_skill(data=skill_data.model_dump())
+    skill = await skill_repo.create(skill_data.model_dump())
     return SkillResponse.model_validate(skill)
 
 
@@ -62,7 +62,7 @@ async def update_skill(
 ):
     """Update a reference skill."""
     skill_repo = SkillRepository(db)
-    skill = await skill_repo.get_skill_by_id(skill_id)
+    skill = await skill_repo.get_by_id(skill_id)
 
     if not skill:
         raise HTTPException(
@@ -71,7 +71,7 @@ async def update_skill(
         )
 
     update_data = skill_data.model_dump(exclude_unset=True)
-    skill = await skill_repo.update_skill(skill, update_data)
+    skill = await skill_repo.update(skill, update_data)
     return SkillResponse.model_validate(skill)
 
 
@@ -83,7 +83,7 @@ async def delete_skill(
 ):
     """Delete (deactivate) a reference skill."""
     skill_repo = SkillRepository(db)
-    skill = await skill_repo.get_skill_by_id(skill_id)
+    skill = await skill_repo.get_by_id(skill_id)
 
     if not skill:
         raise HTTPException(
@@ -92,7 +92,7 @@ async def delete_skill(
         )
 
     # Soft delete by deactivating
-    await skill_repo.update_skill(skill, {"is_active": False})
+    await skill_repo.update(skill, {"is_active": False})
 
 
 # --- Beneficiary Skill Matrix ---
@@ -159,7 +159,7 @@ async def evaluate_beneficiary_skill(
         )
 
     skill_repo = SkillRepository(db)
-    skill = await skill_repo.get_skill_by_id(skill_id)
+    skill = await skill_repo.get_by_id(skill_id)
 
     if not skill:
         raise HTTPException(
@@ -167,7 +167,7 @@ async def evaluate_beneficiary_skill(
             detail="Skill not found",
         )
 
-    evaluation = await skill_repo.evaluate_beneficiary_skill(
+    evaluation = await skill_repo.evaluate_skill(
         beneficiary_id=beneficiary_id,
         skill_id=skill_id,
         level=evaluation_data.level,

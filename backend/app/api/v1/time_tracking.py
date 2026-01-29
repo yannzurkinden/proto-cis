@@ -379,3 +379,75 @@ async def get_absence_stats(
     )
 
     return stats
+
+
+# --- Monthly Summary ---
+
+
+from pydantic import BaseModel
+
+
+class MonthlySummaryResponse(BaseModel):
+    """Schema for monthly time summary."""
+
+    month: str
+    total_hours: float
+    working_days: int
+    present_days: int
+    absent_days: int
+
+
+@router.get(
+    "/{beneficiary_id}/time-entries/monthly-summary",
+    response_model=MonthlySummaryResponse,
+)
+async def get_monthly_summary(
+    beneficiary_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    year: int = Query(...),
+    month: int = Query(..., ge=1, le=12),
+):
+    """Get monthly time summary for a beneficiary."""
+    beneficiary_repo = BeneficiaryRepository(db)
+    beneficiary = await beneficiary_repo.get_by_id(beneficiary_id)
+
+    if not beneficiary:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Beneficiary not found",
+        )
+
+    time_repo = TimeTrackingRepository(db)
+
+    # Get time entries for the month
+    import calendar
+    _, days_in_month = calendar.monthrange(year, month)
+    date_from = date(year, month, 1)
+    date_to = date(year, month, days_in_month)
+
+    entries, _ = await time_repo.get_time_entries(
+        beneficiary_id=beneficiary_id,
+        date_from=date_from,
+        date_to=date_to,
+        limit=500,
+    )
+
+    total_hours = sum(float(e.hours_worked or 0) for e in entries)
+    present_days = len(set(e.entry_date for e in entries))
+
+    # Working days estimate
+    working_days = sum(
+        1 for d in range(1, days_in_month + 1)
+        if date(year, month, d).weekday() < 5
+    )
+
+    absent_days = working_days - present_days
+
+    return MonthlySummaryResponse(
+        month=f"{year}-{month:02d}",
+        total_hours=round(total_hours, 2),
+        working_days=working_days,
+        present_days=present_days,
+        absent_days=max(0, absent_days),
+    )

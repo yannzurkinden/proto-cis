@@ -108,4 +108,4 @@ class AbsenceStatsResponse(BaseModel):
     total_days: int
     by_type: dict
     absence_rate: float
-    monthly_breakdown: List[MonthlyAbsence]
+    monthly_breakdown: List[MonthlyAbsence] = []

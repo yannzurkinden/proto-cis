@@ -21,8 +21,8 @@ export interface PAIFormData {
 }
 
 export const paisApi = {
-  get: async (beneficiaryId: number, paiId: number): Promise<PAI> => {
-    const response = await apiClient.get<PAI>(`/beneficiaries/${beneficiaryId}/pais/${paiId}`)
+  get: async (_beneficiaryId: number, paiId: number): Promise<PAI> => {
+    const response = await apiClient.get<PAI>(`/pais/${paiId}`)
     return response.data
   },
 
@@ -38,18 +38,18 @@ export const paisApi = {
     return response.data
   },
 
-  update: async (beneficiaryId: number, paiId: number, data: PAIFormData): Promise<PAI> => {
-    const response = await apiClient.put<PAI>(`/beneficiaries/${beneficiaryId}/pais/${paiId}`, data)
+  update: async (_beneficiaryId: number, paiId: number, data: PAIFormData): Promise<PAI> => {
+    const response = await apiClient.put<PAI>(`/pais/${paiId}`, data)
     return response.data
   },
 
-  activate: async (beneficiaryId: number, paiId: number): Promise<PAI> => {
-    const response = await apiClient.post<PAI>(`/beneficiaries/${beneficiaryId}/pais/${paiId}/activate`)
+  activate: async (_beneficiaryId: number, paiId: number): Promise<PAI> => {
+    const response = await apiClient.post<PAI>(`/pais/${paiId}/activate`)
     return response.data
   },
 
-  close: async (beneficiaryId: number, paiId: number): Promise<PAI> => {
-    const response = await apiClient.post<PAI>(`/beneficiaries/${beneficiaryId}/pais/${paiId}/close`)
+  close: async (_beneficiaryId: number, paiId: number): Promise<PAI> => {
+    const response = await apiClient.post<PAI>(`/pais/${paiId}/close`)
     return response.data
   },
 }

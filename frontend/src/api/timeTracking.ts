@@ -132,7 +132,7 @@ export const timeTrackingApi = {
   // Stats
   getStats: async (beneficiaryId: number): Promise<TimeStats> => {
     const response = await apiClient.get<TimeStats>(
-      `/beneficiaries/${beneficiaryId}/time-stats`
+      `/beneficiaries/${beneficiaryId}/absence-stats`
     )
     return response.data
   },

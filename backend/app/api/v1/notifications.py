@@ -115,3 +115,22 @@ async def mark_all_as_read(
     notification_repo = NotificationRepository(db)
     count = await notification_repo.mark_all_as_read(user_id=current_user.id)
     return Message(message=f"{count} notifications marked as read")
+
+
+@router.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_notification(
+    notification_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Delete a notification."""
+    notification_repo = NotificationRepository(db)
+    notification = await notification_repo.get_by_id(notification_id)
+
+    if not notification or notification.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+
+    await notification_repo.delete(notification)

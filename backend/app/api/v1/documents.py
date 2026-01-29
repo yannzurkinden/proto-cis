@@ -51,6 +51,17 @@ async def list_documents(
     )
 
 
+@router.get("/types")
+async def list_document_types(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """List available document types."""
+    return [
+        "pai", "medical", "administrative", "contract",
+        "report", "certificate", "correspondence", "other",
+    ]
+
+
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: int,

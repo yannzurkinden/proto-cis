@@ -62,7 +62,7 @@ export const skillsApi = {
   // Skill evaluations
   getEvaluations: async (beneficiaryId: number): Promise<SkillEvaluation[]> => {
     const response = await apiClient.get<SkillEvaluation[]>(
-      `/beneficiaries/${beneficiaryId}/skills/evaluations`
+      `/skills/beneficiaries/${beneficiaryId}/skills`
     )
     return response.data
   },
@@ -71,9 +71,9 @@ export const skillsApi = {
     beneficiaryId: number,
     data: { skill_id: number; level: string; notes?: string }
   ): Promise<SkillEvaluation> => {
-    const response = await apiClient.post<SkillEvaluation>(
-      `/beneficiaries/${beneficiaryId}/skills/evaluations`,
-      data
+    const response = await apiClient.put<SkillEvaluation>(
+      `/skills/beneficiaries/${beneficiaryId}/skills/${data.skill_id}`,
+      { level: data.level, comments: data.notes }
     )
     return response.data
   },
@@ -81,14 +81,14 @@ export const skillsApi = {
   // Trainings
   getTrainings: async (beneficiaryId: number): Promise<Training[]> => {
     const response = await apiClient.get<Training[]>(
-      `/beneficiaries/${beneficiaryId}/trainings`
+      `/skills/beneficiaries/${beneficiaryId}/trainings`
     )
     return response.data
   },
 
   createTraining: async (beneficiaryId: number, data: Partial<Training>): Promise<Training> => {
     const response = await apiClient.post<Training>(
-      `/beneficiaries/${beneficiaryId}/trainings`,
+      `/skills/beneficiaries/${beneficiaryId}/trainings`,
       data
     )
     return response.data
@@ -100,13 +100,13 @@ export const skillsApi = {
     data: Partial<Training>
   ): Promise<Training> => {
     const response = await apiClient.put<Training>(
-      `/beneficiaries/${beneficiaryId}/trainings/${trainingId}`,
+      `/skills/beneficiaries/${beneficiaryId}/trainings/${trainingId}`,
       data
     )
     return response.data
   },
 
   deleteTraining: async (beneficiaryId: number, trainingId: number): Promise<void> => {
-    await apiClient.delete(`/beneficiaries/${beneficiaryId}/trainings/${trainingId}`)
+    await apiClient.delete(`/skills/beneficiaries/${beneficiaryId}/trainings/${trainingId}`)
   },
 }
