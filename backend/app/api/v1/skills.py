@@ -209,7 +209,7 @@ async def list_trainings(
         )
 
     skill_repo = SkillRepository(db)
-    trainings = await skill_repo.get_beneficiary_trainings(beneficiary_id)
+    trainings = await skill_repo.get_trainings(beneficiary_id)
     return [TrainingResponse.model_validate(t) for t in trainings]
 
 

@@ -57,7 +57,7 @@ import { beneficiariesApi } from '@/api/beneficiaries'
 // Schemas
 const timeEntrySchema = z.object({
   date: z.string().min(1, 'Date requise'),
-  time_in: z.string().min(1, "Heure d'arrivee requise"),
+  time_in: z.string().min(1, "Heure d'arrivée requise"),
   time_out: z.string().optional(),
   entry_type: z.string().min(1, 'Type requis'),
   notes: z.string().optional(),
@@ -66,7 +66,7 @@ const timeEntrySchema = z.object({
 type TimeEntryForm = z.infer<typeof timeEntrySchema>
 
 const absenceSchema = z.object({
-  start_date: z.string().min(1, 'Date de debut requise'),
+  start_date: z.string().min(1, 'Date de début requise'),
   end_date: z.string().min(1, 'Date de fin requise'),
   absence_type: z.string().min(1, 'Type requis'),
   reason: z.string().optional(),
@@ -76,8 +76,8 @@ const absenceSchema = z.object({
 type AbsenceForm = z.infer<typeof absenceSchema>
 
 const entryTypeLabels: Record<string, string> = {
-  present: 'Present',
-  half_day: 'Demi-journee',
+  present: 'Présent',
+  half_day: 'Demi-journée',
   training: 'Formation',
   external: 'Externe',
 }
@@ -87,7 +87,7 @@ const absenceTypeLabels: Record<string, string> = {
   vacation: 'Vacances',
   personal: 'Personnel',
   accident: 'Accident',
-  unjustified: 'Injustifiee',
+  unjustified: 'Injustifiée',
   other: 'Autre',
 }
 
@@ -314,7 +314,7 @@ export function TimeTrackingPage() {
                 <DialogHeader>
                   <DialogTitle>Nouveau pointage</DialogTitle>
                   <DialogDescription>
-                    Ajouter une entree de pointage pour ce beneficiaire.
+                    Ajouter une entrée de pointage pour ce bénéficiaire.
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -333,7 +333,7 @@ export function TimeTrackingPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="time-in">Heure d'arrivee</Label>
+                      <Label htmlFor="time-in">Heure d'arrivée</Label>
                       <Input id="time-in" type="time" {...entryForm.register('time_in')} />
                       {entryForm.formState.errors.time_in && (
                         <p className="text-sm text-destructive">
@@ -342,7 +342,7 @@ export function TimeTrackingPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="time-out">Heure de depart</Label>
+                      <Label htmlFor="time-out">Heure de départ</Label>
                       <Input id="time-out" type="time" {...entryForm.register('time_out')} />
                     </div>
                   </div>
@@ -354,7 +354,7 @@ export function TimeTrackingPage() {
                       onValueChange={(value) => entryForm.setValue('entry_type', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selectionner un type" />
+                        <SelectValue placeholder="Sélectionner un type" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(entryTypeLabels).map(([value, label]) => (
@@ -399,15 +399,15 @@ export function TimeTrackingPage() {
               ) : !entries?.length ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center">
                   <Clock className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Aucun pointage enregistre</p>
+                  <p className="text-muted-foreground">Aucun pointage enregistré</p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Date</TableHead>
-                      <TableHead>Arrivee</TableHead>
-                      <TableHead>Depart</TableHead>
+                      <TableHead>Arrivée</TableHead>
+                      <TableHead>Départ</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Heures</TableHead>
                       <TableHead>Notes</TableHead>
@@ -456,7 +456,7 @@ export function TimeTrackingPage() {
                 <DialogHeader>
                   <DialogTitle>Nouvelle absence</DialogTitle>
                   <DialogDescription>
-                    Enregistrer une absence pour ce beneficiaire.
+                    Enregistrer une absence pour ce bénéficiaire.
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -465,7 +465,7 @@ export function TimeTrackingPage() {
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="absence-start">Date de debut</Label>
+                      <Label htmlFor="absence-start">Date de début</Label>
                       <Input id="absence-start" type="date" {...absenceForm.register('start_date')} />
                       {absenceForm.formState.errors.start_date && (
                         <p className="text-sm text-destructive">
@@ -491,7 +491,7 @@ export function TimeTrackingPage() {
                       onValueChange={(value) => absenceForm.setValue('absence_type', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selectionner un type" />
+                        <SelectValue placeholder="Sélectionner un type" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(absenceTypeLabels).map(([value, label]) => (
@@ -536,16 +536,16 @@ export function TimeTrackingPage() {
               ) : !absences?.length ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center">
                   <CalendarDays className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Aucune absence enregistree</p>
+                  <p className="text-muted-foreground">Aucune absence enregistrée</p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date debut</TableHead>
+                      <TableHead>Date début</TableHead>
                       <TableHead>Date fin</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Duree (jours)</TableHead>
+                      <TableHead>Durée (jours)</TableHead>
                       <TableHead>Statut</TableHead>
                       {isManagement && <TableHead>Actions</TableHead>}
                     </TableRow>
@@ -567,7 +567,7 @@ export function TimeTrackingPage() {
                           {absence.validated ? (
                             <Badge variant="default" className="bg-green-600">
                               <CheckCircle className="mr-1 h-3 w-3" />
-                              Validee
+                              Validée
                             </Badge>
                           ) : (
                             <Badge variant="secondary">En attente</Badge>
@@ -627,8 +627,8 @@ export function TimeTrackingPage() {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
                     {vacationBalance.planned_days > 0
-                      ? String(vacationBalance.planned_days) + ' jours planifies'
-                      : 'Aucun jour planifie'}
+                      ? String(vacationBalance.planned_days) + ' jours planifiés'
+                      : 'Aucun jour planifié'}
                   </p>
                 </CardContent>
               </Card>
@@ -650,7 +650,7 @@ export function TimeTrackingPage() {
               <CardContent className="flex flex-col items-center justify-center p-8 text-center">
                 <Palmtree className="mb-4 h-12 w-12 text-muted-foreground" />
                 <p className="text-muted-foreground">
-                  Aucune donnee de solde vacances disponible
+                  Aucune donnée de solde vacances disponible
                 </p>
               </CardContent>
             </Card>

@@ -53,7 +53,7 @@ import { beneficiariesApi } from '@/api/beneficiaries'
 
 // Schemas
 const evaluationSchema = z.object({
-  skill_id: z.string().min(1, 'Competence requise'),
+  skill_id: z.string().min(1, 'Compétence requise'),
   level: z.string().min(1, 'Niveau requis'),
   notes: z.string().optional(),
 })
@@ -77,7 +77,7 @@ const levelLabels: Record<string, string> = {
   not_acquired: 'Non acquis',
   in_progress: 'En cours',
   acquired: 'Acquis',
-  mastered: 'Maitrise',
+  mastered: 'Maîtrisé',
 }
 
 const levelColors: Record<string, string> = {
@@ -215,7 +215,7 @@ export function SkillsPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Competences et formations</h1>
+          <h1 className="text-3xl font-bold">Compétences et formations</h1>
           <p className="text-muted-foreground">
             {beneficiary
               ? beneficiary.first_name + ' ' + beneficiary.last_name
@@ -229,7 +229,7 @@ export function SkillsPage() {
         <TabsList>
           <TabsTrigger value="competences">
             <Star className="mr-2 h-4 w-4" />
-            Matrice de competences
+            Matrice de compétences
           </TabsTrigger>
           <TabsTrigger value="formations">
             <GraduationCap className="mr-2 h-4 w-4" />
@@ -240,19 +240,19 @@ export function SkillsPage() {
         {/* Skills matrix tab */}
         <TabsContent value="competences" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Matrice de competences</h2>
+            <h2 className="text-lg font-semibold">Matrice de compétences</h2>
             <Dialog open={evalDialogOpen} onOpenChange={setEvalDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Evaluer
+                  Évaluer
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Evaluer une competence</DialogTitle>
+                  <DialogTitle>Évaluer une competence</DialogTitle>
                   <DialogDescription>
-                    Selectionner une competence et attribuer un niveau.
+                    Sélectionner une compétence et attribuer un niveau.
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -260,13 +260,13 @@ export function SkillsPage() {
                   className="space-y-4"
                 >
                   <div className="space-y-2">
-                    <Label htmlFor="eval-skill">Competence</Label>
+                    <Label htmlFor="eval-skill">Compétence</Label>
                     <Select
                       value={evalForm.watch('skill_id')}
                       onValueChange={(value) => evalForm.setValue('skill_id', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selectionner une competence" />
+                        <SelectValue placeholder="Sélectionner une compétence" />
                       </SelectTrigger>
                       <SelectContent>
                         {skills?.map((skill) => (
@@ -290,7 +290,7 @@ export function SkillsPage() {
                       onValueChange={(value) => evalForm.setValue('level', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selectionner un niveau" />
+                        <SelectValue placeholder="Sélectionner un niveau" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(levelLabels).map(([value, label]) => (
@@ -340,17 +340,17 @@ export function SkillsPage() {
               ) : !skills?.length ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center">
                   <Award className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Aucune competence definie dans le referentiel</p>
+                  <p className="text-muted-foreground">Aucune compétence définie dans le référentiel</p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Competence</TableHead>
-                      <TableHead>Categorie</TableHead>
+                      <TableHead>Compétence</TableHead>
+                      <TableHead>Catégorie</TableHead>
                       <TableHead>Niveau</TableHead>
-                      <TableHead>Date evaluation</TableHead>
-                      <TableHead>Evaluateur</TableHead>
+                      <TableHead>Date évaluation</TableHead>
+                      <TableHead>Évaluateur</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -409,7 +409,7 @@ export function SkillsPage() {
                   <DialogDescription>
                     {editingTraining
                       ? 'Modifier les informations de la formation.'
-                      : 'Enregistrer une nouvelle formation pour ce beneficiaire.'}
+                      : 'Enregistrer une nouvelle formation pour ce bénéficiaire.'}
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -432,7 +432,7 @@ export function SkillsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="training-start">Date de debut</Label>
+                      <Label htmlFor="training-start">Date de début</Label>
                       <Input
                         id="training-start"
                         type="date"
@@ -451,7 +451,7 @@ export function SkillsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="training-hours">Duree (heures)</Label>
+                      <Label htmlFor="training-hours">Durée (heures)</Label>
                       <Input
                         id="training-hours"
                         type="number"
@@ -512,7 +512,7 @@ export function SkillsPage() {
               ) : !trainings?.length ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center">
                   <GraduationCap className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Aucune formation enregistree</p>
+                  <p className="text-muted-foreground">Aucune formation enregistrée</p>
                 </div>
               ) : (
                 <Table>
@@ -520,7 +520,7 @@ export function SkillsPage() {
                     <TableRow>
                       <TableHead>Titre</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Duree</TableHead>
+                      <TableHead>Durée</TableHead>
                       <TableHead>Formateur</TableHead>
                       <TableHead>Certificat</TableHead>
                       <TableHead>Actions</TableHead>

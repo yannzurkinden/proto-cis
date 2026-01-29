@@ -219,7 +219,7 @@ async def list_beneficiary_pais(
     beneficiary_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    status: Optional[str] = None,
+    pai_status: Optional[str] = Query(None, alias="status"),
 ):
     """List all PAIs for a beneficiary."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -232,7 +232,7 @@ async def list_beneficiary_pais(
         )
 
     pai_repo = PAIRepository(db)
-    pais = await pai_repo.get_by_beneficiary(beneficiary_id, status=status)
+    pais = await pai_repo.get_by_beneficiary(beneficiary_id, status=pai_status)
 
     result = []
     for pai in pais:

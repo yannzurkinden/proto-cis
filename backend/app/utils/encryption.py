@@ -55,5 +55,5 @@ def decrypt_data(encrypted_data: Optional[str]) -> Optional[str]:
         decrypted = fernet.decrypt(encrypted_bytes)
         return decrypted.decode()
     except Exception:
-        # Return empty string if decryption fails
-        return ""
+        # If decryption fails, the data may be stored as plaintext (e.g. seed data)
+        return encrypted_data

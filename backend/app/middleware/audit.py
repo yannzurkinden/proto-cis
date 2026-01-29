@@ -89,7 +89,69 @@ class AuditMiddleware(BaseHTTPMiddleware):
             else:
                 logger.info("audit_operation", **log_data)
 
+            # Write audit log to database
+            try:
+                await self._write_audit_to_db(
+                    method=method,
+                    path=path,
+                    status_code=response.status_code,
+                    client_ip=client_ip,
+                    user_agent=user_agent[:200],
+                    is_medical=is_medical,
+                )
+            except Exception:
+                logger.error("audit_db_write_failed", path=path, method=method)
+
         return response
+
+    async def _write_audit_to_db(
+        self,
+        method: str,
+        path: str,
+        status_code: int,
+        client_ip: str,
+        user_agent: str,
+        is_medical: bool = False,
+    ) -> None:
+        """Write audit log entry to database."""
+        from app.database import AsyncSessionLocal
+        from app.models.audit import AuditLog
+
+        action = f"{method} {path}"
+        resource_type = self._extract_resource_type(path)
+        resource_id = self._extract_resource_id(path)
+
+        async with AsyncSessionLocal() as session:
+            try:
+                log = AuditLog(
+                    user_id=None,
+                    action=action,
+                    resource_type=resource_type,
+                    resource_id=resource_id,
+                    old_values=None,
+                    new_values={"status_code": status_code, "medical": True} if is_medical else None,
+                    ip_address=client_ip,
+                    user_agent=user_agent,
+                )
+                session.add(log)
+                await session.commit()
+            except Exception:
+                await session.rollback()
+
+    def _extract_resource_type(self, path: str) -> str:
+        """Extract the resource type from the URL path."""
+        parts = path.replace("/api/v1/", "").split("/")
+        return parts[0] if parts else "unknown"
+
+    def _extract_resource_id(self, path: str) -> Optional[int]:
+        """Extract numeric resource ID from the URL path."""
+        parts = path.split("/")
+        for part in parts:
+            try:
+                return int(part)
+            except ValueError:
+                continue
+        return None
 
     def _should_audit(self, method: str, path: str) -> bool:
         """Check if this request should be audited."""

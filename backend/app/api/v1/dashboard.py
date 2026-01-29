@@ -79,11 +79,11 @@ async def get_msp_dashboard(
             ReminderItem(
                 type="objective_overdue",
                 beneficiary_id=obj.beneficiary_id,
-                beneficiary_name=obj.beneficiary.full_name if obj.beneficiary else "Unknown",
+                beneficiary_name=obj.beneficiary.full_name if obj.beneficiary else "Inconnu",
                 objective_id=obj.id,
                 objective_title=obj.title,
                 due_date=obj.due_date,
-                message=f"Objective overdue since {obj.due_date}",
+                message=f"Objectif en retard depuis le {obj.due_date}",
             )
         )
 
@@ -151,8 +151,8 @@ async def get_management_dashboard(
             Alert(
                 type="objective_overdue",
                 beneficiary_id=obj.beneficiary_id,
-                beneficiary_name=obj.beneficiary.full_name if obj.beneficiary else "Unknown",
-                message=f"Objective '{obj.title}' is overdue",
+                beneficiary_name=obj.beneficiary.full_name if obj.beneficiary else "Inconnu",
+                message=f"L'objectif '{obj.title}' est en retard",
             )
         )
 

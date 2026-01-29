@@ -108,6 +108,16 @@ export function LoginPage() {
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Se connecter
             </Button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                className="text-sm text-muted-foreground hover:text-primary underline"
+                onClick={() => alert('Veuillez contacter votre administrateur pour réinitialiser votre mot de passe.')}
+              >
+                Mot de passe oublié ?
+              </button>
+            </div>
           </form>
         </CardContent>
       </Card>
