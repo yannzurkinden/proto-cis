@@ -207,6 +207,173 @@ export interface Document {
   uploaded_by: number | null
 }
 
+// Skill types
+export interface Skill {
+  id: number
+  name: string
+  category: string | null
+  description: string | null
+  is_active: boolean
+  sort_order: number
+}
+
+export interface SkillCreate {
+  name: string
+  category?: string
+  description?: string
+}
+
+export interface SkillUpdate {
+  name?: string
+  category?: string
+  description?: string
+  is_active?: boolean
+}
+
+export interface BeneficiarySkill {
+  id: number
+  skill_id: number
+  skill_name: string | null
+  level: 'not_acquired' | 'in_progress' | 'acquired' | 'mastered'
+  evaluation_date: string
+  evaluated_by: number | null
+  comments: string | null
+}
+
+export interface BeneficiarySkillEvaluate {
+  level: 'not_acquired' | 'in_progress' | 'acquired' | 'mastered'
+  comments?: string
+}
+
+// Training types
+export interface Training {
+  id: number
+  beneficiary_id: number
+  title: string
+  training_date: string
+  duration_hours: number | null
+  trainer: string | null
+  comments: string | null
+  created_at: string
+}
+
+export interface TrainingCreate {
+  title: string
+  training_date: string
+  duration_hours?: number
+  trainer?: string
+  comments?: string
+}
+
+export interface TrainingUpdate {
+  title?: string
+  training_date?: string
+  duration_hours?: number
+  trainer?: string
+  comments?: string
+}
+
+// Time tracking types
+export interface TimeEntry {
+  id: number
+  beneficiary_id: number
+  entry_date: string
+  time_in: string | null
+  time_out: string | null
+  entry_type: 'work' | 'training' | 'appointment'
+  notes: string | null
+  hours_worked: number | null
+}
+
+export interface TimeEntryCreate {
+  entry_date: string
+  time_in?: string
+  time_out?: string
+  entry_type?: 'work' | 'training' | 'appointment'
+  notes?: string
+}
+
+export interface TimeEntryUpdate {
+  time_in?: string
+  time_out?: string
+  entry_type?: 'work' | 'training' | 'appointment'
+  notes?: string
+}
+
+export interface Absence {
+  id: number
+  beneficiary_id: number
+  absence_type: 'sick' | 'vacation' | 'accident' | 'unauthorized' | 'other'
+  start_date: string
+  end_date: string
+  notes: string | null
+  justification_document_id: number | null
+  validated_by: number | null
+  validated_at: string | null
+  duration_days: number
+}
+
+export interface AbsenceCreate {
+  absence_type: 'sick' | 'vacation' | 'accident' | 'unauthorized' | 'other'
+  start_date: string
+  end_date: string
+  notes?: string
+}
+
+export interface AbsenceUpdate {
+  absence_type?: 'sick' | 'vacation' | 'accident' | 'unauthorized' | 'other'
+  start_date?: string
+  end_date?: string
+  notes?: string
+}
+
+export interface VacationBalance {
+  year: number
+  entitled_days: number
+  taken_days: number
+  remaining_days: number
+  pending_requests: number
+}
+
+export interface MonthlyAbsence {
+  month: string
+  days: number
+}
+
+export interface AbsenceStats {
+  total_days: number
+  by_type: Record<string, number>
+  absence_rate: number
+  monthly_breakdown: MonthlyAbsence[]
+}
+
+// Notification types
+export interface Notification {
+  id: number
+  user_id: number
+  notification_type: string
+  title: string
+  message: string | null
+  link: string | null
+  is_read: boolean
+  read_at: string | null
+  created_at: string
+}
+
+// Audit log types
+export interface AuditLog {
+  id: number
+  user_id: number | null
+  action: string
+  resource_type: string
+  resource_id: number | null
+  old_values: Record<string, unknown> | null
+  new_values: Record<string, unknown> | null
+  ip_address: string | null
+  user_agent: string | null
+  created_at: string
+}
+
 // Auth types
 export interface LoginRequest {
   email: string

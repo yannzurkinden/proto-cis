@@ -1,13 +1,17 @@
 """Beneficiary management endpoints."""
 
+from datetime import date
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_msp_or_above
 from app.models.user import User
+from app.models.journal import JournalEntry
+from app.models.objective import Objective
 from app.repositories.beneficiary_repository import BeneficiaryRepository
 from app.repositories.pai_repository import PAIRepository
 from app.repositories.objective_repository import ObjectiveRepository
@@ -65,7 +69,35 @@ async def list_beneficiaries(
         sort=sort,
     )
 
-    # Build response
+    # Build response -- batch query objective counts to avoid N+1
+    beneficiary_ids = [b.id for b in beneficiaries]
+    in_progress_map: dict[int, int] = {}
+    overdue_map: dict[int, int] = {}
+
+    if beneficiary_ids:
+        in_progress_query = (
+            select(Objective.beneficiary_id, func.count().label("cnt"))
+            .where(
+                Objective.beneficiary_id.in_(beneficiary_ids),
+                Objective.status == "in_progress",
+            )
+            .group_by(Objective.beneficiary_id)
+        )
+        in_progress_result = await db.execute(in_progress_query)
+        in_progress_map = {row.beneficiary_id: row.cnt for row in in_progress_result}
+
+        overdue_query = (
+            select(Objective.beneficiary_id, func.count().label("cnt"))
+            .where(
+                Objective.beneficiary_id.in_(beneficiary_ids),
+                Objective.due_date < date.today(),
+                Objective.status.in_(["pending", "in_progress"]),
+            )
+            .group_by(Objective.beneficiary_id)
+        )
+        overdue_result = await db.execute(overdue_query)
+        overdue_map = {row.beneficiary_id: row.cnt for row in overdue_result}
+
     items = []
     for b in beneficiaries:
         items.append(
@@ -82,8 +114,8 @@ async def list_beneficiaries(
                 referent_name=b.referent.full_name if b.referent else None,
                 entry_date=b.entry_date,
                 occupation_rate=b.occupation_rate,
-                objectives_in_progress=0,  # TODO: Calculate
-                objectives_overdue=0,  # TODO: Calculate
+                objectives_in_progress=in_progress_map.get(b.id, 0),
+                objectives_overdue=overdue_map.get(b.id, 0),
             )
         )
 
@@ -132,6 +164,39 @@ async def get_beneficiary(
         ContactResponse.model_validate(c) for c in beneficiary.contacts
     ]
 
+    # Calculate beneficiary stats
+    obj_stats_query = select(
+        func.count().label("total"),
+        func.count().filter(Objective.status == "achieved").label("achieved"),
+        func.count().filter(Objective.status == "in_progress").label("in_progress"),
+        func.count().filter(
+            and_(
+                Objective.due_date < date.today(),
+                Objective.status.in_(["pending", "in_progress"]),
+            )
+        ).label("overdue"),
+    ).where(Objective.beneficiary_id == beneficiary_id)
+    obj_result = await db.execute(obj_stats_query)
+    obj_row = obj_result.one()
+
+    # Get last journal entry date
+    last_journal_query = (
+        select(JournalEntry.entry_date)
+        .where(JournalEntry.beneficiary_id == beneficiary_id)
+        .order_by(JournalEntry.entry_date.desc())
+        .limit(1)
+    )
+    last_journal_scalar = (await db.execute(last_journal_query)).scalar_one_or_none()
+    last_journal_date = last_journal_scalar.date() if last_journal_scalar else None
+
+    beneficiary_stats = BeneficiaryStats(
+        objectives_total=obj_row.total,
+        objectives_achieved=obj_row.achieved,
+        objectives_in_progress=obj_row.in_progress,
+        objectives_overdue=obj_row.overdue,
+        last_journal_entry=last_journal_date,
+    )
+
     return BeneficiaryResponse(
         id=beneficiary.id,
         first_name=beneficiary.first_name,
@@ -159,7 +224,7 @@ async def get_beneficiary(
         referent_name=beneficiary.referent.full_name if beneficiary.referent else None,
         current_pai=current_pai,
         contacts=contacts,
-        stats=BeneficiaryStats(),  # TODO: Calculate stats
+        stats=beneficiary_stats,
         created_at=beneficiary.created_at,
         updated_at=beneficiary.updated_at,
     )

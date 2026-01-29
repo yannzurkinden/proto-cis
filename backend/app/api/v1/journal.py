@@ -4,6 +4,7 @@ from datetime import date
 from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -70,6 +71,18 @@ async def list_journal_entries(
         unit_id=unit_id,
     )
 
+    # Batch load author names to avoid N+1 queries
+    author_ids = list({entry.author_id for entry in entries})
+    author_map: dict[int, str] = {}
+    if author_ids:
+        author_query = select(User.id, User.first_name, User.last_name).where(
+            User.id.in_(author_ids)
+        )
+        author_result = await db.execute(author_query)
+        author_map = {
+            row.id: f"{row.first_name} {row.last_name}" for row in author_result
+        }
+
     items = []
     for entry in entries:
         categories = [
@@ -84,14 +97,14 @@ async def list_journal_entries(
                 beneficiary_id=entry.beneficiary_id,
                 beneficiary_name=entry.beneficiary.full_name if entry.beneficiary else None,
                 author_id=entry.author_id,
-                author_name=None,  # TODO: Load author name
+                author_name=author_map.get(entry.author_id),
                 title=entry.title,
                 content=entry.content,
                 entry_date=entry.entry_date,
                 visibility=entry.visibility,
                 categories=categories,
                 tags=entry_tags,
-                attachments_count=0,  # TODO: Calculate
+                attachments_count=0,  # Document attachment counting not yet integrated
                 created_at=entry.created_at,
                 updated_at=entry.updated_at,
             )
@@ -148,6 +161,13 @@ async def get_journal_entry(
             detail="Journal entry not found",
         )
 
+    # Load author name
+    author_result = await db.execute(
+        select(User).where(User.id == entry.author_id)
+    )
+    author = author_result.scalar_one_or_none()
+    author_name = author.full_name if author else None
+
     categories = [
         JournalCategoryResponse.model_validate(ec.category)
         for ec in entry.categories
@@ -159,14 +179,14 @@ async def get_journal_entry(
         beneficiary_id=entry.beneficiary_id,
         beneficiary_name=entry.beneficiary.full_name if entry.beneficiary else None,
         author_id=entry.author_id,
-        author_name=None,
+        author_name=author_name,
         title=entry.title,
         content=entry.content,
         entry_date=entry.entry_date,
         visibility=entry.visibility,
         categories=categories,
         tags=entry_tags,
-        attachments_count=0,
+        attachments_count=0,  # Document attachment counting not yet integrated
         created_at=entry.created_at,
         updated_at=entry.updated_at,
     )
@@ -258,6 +278,13 @@ async def update_journal_entry(
 
     entry = await journal_repo.get_by_id_with_relations(entry.id)
 
+    # Load author name
+    update_author_result = await db.execute(
+        select(User).where(User.id == entry.author_id)
+    )
+    update_author = update_author_result.scalar_one_or_none()
+    update_author_name = update_author.full_name if update_author else None
+
     categories = [
         JournalCategoryResponse.model_validate(ec.category)
         for ec in entry.categories
@@ -269,14 +296,14 @@ async def update_journal_entry(
         beneficiary_id=entry.beneficiary_id,
         beneficiary_name=entry.beneficiary.full_name if entry.beneficiary else None,
         author_id=entry.author_id,
-        author_name=None,
+        author_name=update_author_name,
         title=entry.title,
         content=entry.content,
         entry_date=entry.entry_date,
         visibility=entry.visibility,
         categories=categories,
         tags=entry_tags,
-        attachments_count=0,
+        attachments_count=0,  # Document attachment counting not yet integrated
         created_at=entry.created_at,
         updated_at=entry.updated_at,
     )

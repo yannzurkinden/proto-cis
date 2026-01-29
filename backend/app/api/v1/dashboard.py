@@ -1,13 +1,16 @@
 """Dashboard endpoints."""
 
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_management
+from app.models.beneficiary import Beneficiary
+from app.models.objective import Objective
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
 from app.repositories.objective_repository import ObjectiveRepository
@@ -48,6 +51,12 @@ async def get_msp_dashboard(
         )
         overdue_count = sum(1 for o in overdue_objectives if o.beneficiary_id == b.id)
 
+        # Get latest journal entry for this beneficiary
+        latest_entries = await journal_repo.get_recent_entries(
+            beneficiary_id=b.id, limit=1
+        )
+        last_entry_date = latest_entries[0].entry_date.date() if latest_entries else None
+
         my_beneficiaries.append(
             BeneficiarySummary(
                 id=b.id,
@@ -55,7 +64,7 @@ async def get_msp_dashboard(
                 photo_url=b.photo_url,
                 status=b.status,
                 objectives_overdue=overdue_count,
-                last_journal_entry=None,  # TODO: Calculate
+                last_journal_entry=last_entry_date,
             )
         )
 
@@ -147,21 +156,55 @@ async def get_management_dashboard(
             )
         )
 
+    # Calculate monthly statistics
+    first_of_month = date.today().replace(day=1)
+    first_of_month_dt = datetime(
+        first_of_month.year, first_of_month.month, first_of_month.day,
+        tzinfo=timezone.utc,
+    )
+
+    # Count new beneficiaries this month (entry_date >= first of month)
+    new_query = select(func.count()).select_from(Beneficiary).where(
+        Beneficiary.entry_date >= first_of_month,
+    )
+    if unit_id:
+        new_query = new_query.where(Beneficiary.unit_id == unit_id)
+    new_this_month = (await db.execute(new_query)).scalar() or 0
+
+    # Count exited beneficiaries this month (exit_date >= first of month)
+    exited_query = select(func.count()).select_from(Beneficiary).where(
+        Beneficiary.exit_date >= first_of_month,
+    )
+    if unit_id:
+        exited_query = exited_query.where(Beneficiary.unit_id == unit_id)
+    exited_this_month = (await db.execute(exited_query)).scalar() or 0
+
+    # Count objectives achieved this month
+    achieved_query = select(func.count()).select_from(Objective).where(
+        Objective.status == "achieved",
+        Objective.updated_at >= first_of_month_dt,
+    )
+    if unit_id:
+        achieved_query = achieved_query.join(Beneficiary).where(
+            Beneficiary.unit_id == unit_id
+        )
+    achieved_this_month = (await db.execute(achieved_query)).scalar() or 0
+
     return ManagementDashboardResponse(
         summary=BeneficiarySummaryStats(
             total_beneficiaries=total_beneficiaries,
             active_beneficiaries=active_beneficiaries,
-            new_this_month=0,  # TODO: Calculate
-            exited_this_month=0,  # TODO: Calculate
+            new_this_month=new_this_month,
+            exited_this_month=exited_this_month,
         ),
         objectives_overview=ObjectivesOverviewSummary(
             total=stats["total"],
-            achieved_this_month=0,  # TODO: Calculate
+            achieved_this_month=achieved_this_month,
             overdue=stats["overdue"],
             achievement_rate=achievement_rate,
         ),
         absence_stats=AbsenceStatsSummary(
-            global_rate=0.0,  # TODO: Calculate
+            global_rate=0.0,  # Absence rate requires time tracking data integration
             by_unit=[],
         ),
         alerts=alerts,

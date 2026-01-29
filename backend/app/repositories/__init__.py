@@ -7,6 +7,9 @@ from app.repositories.pai_repository import PAIRepository
 from app.repositories.objective_repository import ObjectiveRepository
 from app.repositories.journal_repository import JournalRepository
 from app.repositories.document_repository import DocumentRepository
+from app.repositories.skill_repository import SkillRepository
+from app.repositories.time_tracking_repository import TimeTrackingRepository
+from app.repositories.notification_repository import NotificationRepository, AuditLogRepository
 
 __all__ = [
     "UserRepository",
@@ -16,4 +19,8 @@ __all__ = [
     "ObjectiveRepository",
     "JournalRepository",
     "DocumentRepository",
+    "SkillRepository",
+    "TimeTrackingRepository",
+    "NotificationRepository",
+    "AuditLogRepository",
 ]

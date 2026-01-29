@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.config import get_settings
+from app.middleware.audit import AuditMiddleware
+from app.middleware.security import SecurityHeadersMiddleware, RateLimitMiddleware
 
 settings = get_settings()
 
@@ -29,6 +31,11 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
 )
+
+# Security middleware (order matters: first added = outermost)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(AuditMiddleware)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60, login_per_minute=5)
 
 # CORS middleware
 app.add_middleware(

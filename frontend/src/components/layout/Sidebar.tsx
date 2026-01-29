@@ -5,8 +5,10 @@ import {
   Target,
   BookOpen,
   FileText,
-  Settings,
   ChevronLeft,
+  BarChart3,
+  Shield,
+  Bell,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/uiStore'
@@ -15,14 +17,19 @@ import { Button } from '@/components/ui/button'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Beneficiaires', href: '/beneficiaries', icon: Users },
+  { name: 'Bénéficiaires', href: '/beneficiaries', icon: Users },
   { name: 'Objectifs', href: '/objectives', icon: Target },
   { name: 'Journal', href: '/journal', icon: BookOpen },
   { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
+]
+
+const managementNavigation = [
+  { name: 'Rapports', href: '/reports', icon: BarChart3 },
 ]
 
 const adminNavigation = [
-  { name: 'Parametres', href: '/settings', icon: Settings },
+  { name: 'Administration', href: '/admin', icon: Shield },
 ]
 
 export function Sidebar() {
@@ -31,6 +38,28 @@ export function Sidebar() {
   const { user } = useAuthStore()
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'RUA'
+  const isManagement =
+    user?.role === 'ADMIN' || user?.role === 'RUA' || user?.role === 'RES'
+
+  const renderNavItems = (items: typeof navigation) =>
+    items.map((item) => {
+      const isActive = location.pathname.startsWith(item.href)
+      return (
+        <Link
+          key={item.name}
+          to={item.href}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+            isActive
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          )}
+        >
+          <item.icon className="h-5 w-5 flex-shrink-0" />
+          {sidebarOpen && <span>{item.name}</span>}
+        </Link>
+      )
+    })
 
   return (
     <aside
@@ -61,46 +90,19 @@ export function Sidebar() {
       </div>
 
       <nav className="space-y-1 p-2">
-        {navigation.map((item) => {
-          const isActive = location.pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              )}
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              {sidebarOpen && <span>{item.name}</span>}
-            </Link>
-          )
-        })}
+        {renderNavItems(navigation)}
+
+        {isManagement && (
+          <>
+            <div className="my-4 border-t" />
+            {renderNavItems(managementNavigation)}
+          </>
+        )}
 
         {isAdmin && (
           <>
-            <div className="my-4 border-t" />
-            {adminNavigation.map((item) => {
-              const isActive = location.pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {sidebarOpen && <span>{item.name}</span>}
-                </Link>
-              )
-            })}
+            {!isManagement && <div className="my-4 border-t" />}
+            {renderNavItems(adminNavigation)}
           </>
         )}
       </nav>
