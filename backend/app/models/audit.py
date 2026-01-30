@@ -3,8 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -31,8 +30,8 @@ class AuditLog(Base):
     )  # beneficiary, objective, journal, document, etc.
     resource_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    old_values: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    new_values: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    old_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    new_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
