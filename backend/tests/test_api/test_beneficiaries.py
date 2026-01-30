@@ -70,9 +70,9 @@ class TestListBeneficiaries:
         assert any("Dupont" in item["last_name"] for item in data["items"])
 
     async def test_list_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/beneficiaries")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Get single beneficiary ───────────────────────────────────────────────────

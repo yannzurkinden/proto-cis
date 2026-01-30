@@ -142,7 +142,7 @@ class TestChangePassword:
         assert response.status_code == 422  # pydantic validation (min_length=12)
 
     async def test_change_password_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated request returns 403."""
+        """Unauthenticated request returns 401."""
         response = await client.post(
             "/api/v1/auth/change-password",
             json={
@@ -150,7 +150,7 @@ class TestChangePassword:
                 "new_password": "y",
             },
         )
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Logout ───────────────────────────────────────────────────────────────────
@@ -170,9 +170,9 @@ class TestLogout:
         assert data["message"] == "Logout successful"
 
     async def test_logout_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated logout returns 403."""
+        """Unauthenticated logout returns 401."""
         response = await client.post("/api/v1/auth/logout")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Forgot password ──────────────────────────────────────────────────────────
@@ -206,10 +206,10 @@ class TestForgotPassword:
 class TestProtectedEndpoints:
     """Verify that protected endpoints reject unauthenticated requests."""
 
-    async def test_no_token_returns_403(self, client: AsyncClient):
-        """GET /api/v1/users/me without a token returns 403."""
+    async def test_no_token_returns_401(self, client: AsyncClient):
+        """GET /api/v1/users/me without a token returns 401."""
         response = await client.get("/api/v1/users/me")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     async def test_invalid_token_returns_401(self, client: AsyncClient):
         """An invalid JWT returns 401."""
