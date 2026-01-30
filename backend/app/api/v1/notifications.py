@@ -93,7 +93,7 @@ async def mark_as_read(
 ):
     """Mark a specific notification as read."""
     notification_repo = NotificationRepository(db)
-    notification = await notification_repo.get_notification_by_id(notification_id)
+    notification = await notification_repo.get_by_id(notification_id)
 
     if not notification or notification.user_id != current_user.id:
         raise HTTPException(
@@ -101,7 +101,7 @@ async def mark_as_read(
             detail="Notification not found",
         )
 
-    notification = await notification_repo.mark_as_read(notification)
+    notification = await notification_repo.mark_as_read(notification_id)
     return NotificationResponse.model_validate(notification)
 
 

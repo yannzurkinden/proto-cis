@@ -44,9 +44,9 @@ class TestMSPDashboard:
         assert response.status_code == 200
 
     async def test_msp_dashboard_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/dashboard/msp")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Management Dashboard ─────────────────────────────────────────────────────
@@ -105,9 +105,9 @@ class TestManagementDashboard:
         assert response.status_code == 403
 
     async def test_management_dashboard_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/dashboard/management")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     async def test_management_dashboard_objectives_overview(
         self, client: AsyncClient, admin_headers, test_beneficiary, db_session

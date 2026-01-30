@@ -457,9 +457,9 @@ class TestListCategories:
         assert data[0]["name"] == "observation"
 
     async def test_list_categories_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/journal/categories")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Helper ───────────────────────────────────────────────────────────────────

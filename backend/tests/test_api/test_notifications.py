@@ -61,9 +61,9 @@ class TestListNotifications:
         assert data["items"] == []
 
     async def test_list_notifications_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/notifications")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── Unread count ─────────────────────────────────────────────────────────────
@@ -177,6 +177,6 @@ class TestMarkAllAsRead:
         assert "0" in response.json()["message"]
 
     async def test_mark_all_as_read_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.post("/api/v1/notifications/read-all")
-        assert response.status_code == 403
+        assert response.status_code == 401
