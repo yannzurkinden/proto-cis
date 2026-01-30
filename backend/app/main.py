@@ -35,7 +35,8 @@ app = FastAPI(
 # Security middleware (order matters: first added = outermost)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(AuditMiddleware)
-app.add_middleware(RateLimitMiddleware, requests_per_minute=60, login_per_minute=5)
+if not settings.testing:
+    app.add_middleware(RateLimitMiddleware, requests_per_minute=60, login_per_minute=5)
 
 # CORS middleware
 app.add_middleware(

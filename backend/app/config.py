@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "CIS"
     debug: bool = False
+    testing: bool = False
     allowed_origins: str = "http://localhost:3000,http://localhost:5173"
 
     # Database

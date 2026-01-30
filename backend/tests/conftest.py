@@ -1,7 +1,11 @@
 """Pytest configuration and fixtures for CIS backend tests."""
 
 import datetime
+import os
 from collections.abc import AsyncGenerator
+
+# Disable rate limiting and other prod middleware for tests
+os.environ["TESTING"] = "true"
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
