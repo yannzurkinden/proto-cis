@@ -1,7 +1,7 @@
 """Journal entry management endpoints."""
 
 from datetime import date
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -10,15 +10,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_current_user, require_msp_or_above
 from app.models.user import User
-from app.repositories.journal_repository import JournalRepository
 from app.repositories.beneficiary_repository import BeneficiaryRepository
-from app.schemas.journal import (
-    JournalEntryCreate,
-    JournalEntryUpdate,
-    JournalEntryResponse,
-    JournalCategoryResponse,
-)
+from app.repositories.journal_repository import JournalRepository
 from app.schemas.common import PaginatedResponse
+from app.schemas.journal import (
+    JournalCategoryResponse,
+    JournalEntryCreate,
+    JournalEntryResponse,
+    JournalEntryUpdate,
+)
 
 router = APIRouter()
 
@@ -29,13 +29,13 @@ async def list_journal_entries(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    beneficiary_id: Optional[int] = None,
-    author_id: Optional[int] = None,
-    category: Optional[str] = None,
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
-    search: Optional[str] = None,
-    tags: Optional[str] = None,
+    beneficiary_id: int | None = None,
+    author_id: int | None = None,
+    category: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    search: str | None = None,
+    tags: str | None = None,
 ):
     """List all journal entries with filtering and pagination."""
     journal_repo = JournalRepository(db)
@@ -136,7 +136,7 @@ async def list_categories(
 async def list_tags(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    beneficiary_id: Optional[int] = None,
+    beneficiary_id: int | None = None,
 ):
     """List all unique tags used in journal entries."""
     if beneficiary_id:

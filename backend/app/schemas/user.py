@@ -1,9 +1,9 @@
 """User-related schemas."""
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserBase(BaseModel):
@@ -13,7 +13,7 @@ class UserBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
     role: Literal["ADMIN", "RUA", "RES", "MSP", "CONSULT"] = "MSP"
-    unit_id: Optional[int] = None
+    unit_id: int | None = None
 
 
 class UserCreate(UserBase):
@@ -25,12 +25,12 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     """Schema for updating a user."""
 
-    email: Optional[str] = None
-    first_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    last_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    role: Optional[Literal["ADMIN", "RUA", "RES", "MSP", "CONSULT"]] = None
-    unit_id: Optional[int] = None
-    is_active: Optional[bool] = None
+    email: str | None = None
+    first_name: str | None = Field(None, min_length=1, max_length=100)
+    last_name: str | None = Field(None, min_length=1, max_length=100)
+    role: Literal["ADMIN", "RUA", "RES", "MSP", "CONSULT"] | None = None
+    unit_id: int | None = None
+    is_active: bool | None = None
 
 
 class UserResponse(UserBase):
@@ -40,9 +40,9 @@ class UserResponse(UserBase):
 
     id: int
     is_active: bool
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     created_at: datetime
-    unit_name: Optional[str] = None
+    unit_name: str | None = None
 
 
 class UserInDB(UserBase):
@@ -54,7 +54,7 @@ class UserInDB(UserBase):
     hashed_password: str
     is_active: bool
     is_superuser: bool
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -69,8 +69,8 @@ class UserMeResponse(BaseModel):
     first_name: str
     last_name: str
     role: str
-    unit_id: Optional[int] = None
-    unit_name: Optional[str] = None
+    unit_id: int | None = None
+    unit_name: str | None = None
     is_active: bool
 
 

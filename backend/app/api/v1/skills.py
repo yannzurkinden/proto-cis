@@ -1,9 +1,8 @@
 """Skill reference management and beneficiary skill evaluation endpoints."""
 
-from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -21,7 +20,6 @@ from app.schemas.skill import (
     TrainingResponse,
     TrainingUpdate,
 )
-from app.schemas.common import PaginatedResponse
 
 router = APIRouter()
 

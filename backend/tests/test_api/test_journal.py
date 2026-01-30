@@ -1,8 +1,6 @@
 """Tests for journal entry endpoints (/api/v1/journal/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── Create journal entry ─────────────────────────────────────────────────────
 
@@ -117,7 +115,7 @@ class TestListJournalEntries:
             author_id=(await _get_msp_id(db_session)),
             title="Listed entry",
             content="Some content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -134,9 +132,10 @@ class TestListJournalEntries:
         """Filter journal entries by beneficiary_id."""
         import datetime
 
+        from sqlalchemy import select
+
         from app.models.journal import JournalEntry
         from app.models.user import User
-        from sqlalchemy import select
 
         # Use admin as author
         result = await db_session.execute(
@@ -149,7 +148,7 @@ class TestListJournalEntries:
             author_id=admin.id,
             title="Filtered entry",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -182,7 +181,7 @@ class TestGetJournalEntry:
             author_id=(await _get_msp_id(db_session)),
             title="Get me",
             content="Detailed content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -223,7 +222,7 @@ class TestUpdateJournalEntry:
             author_id=msp_id,
             title="Original",
             content="Original content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -256,7 +255,7 @@ class TestUpdateJournalEntry:
             author_id=msp_user.id,
             title="MSP entry",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -287,7 +286,7 @@ class TestUpdateJournalEntry:
             author_id=msp_id,
             title="Owned by MSP",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -348,7 +347,7 @@ class TestDeleteJournalEntry:
             author_id=msp_id,
             title="To delete",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -377,7 +376,7 @@ class TestDeleteJournalEntry:
             author_id=msp_user.id,
             title="Admin delete",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()
@@ -404,7 +403,7 @@ class TestDeleteJournalEntry:
             author_id=msp_id,
             title="Protected",
             content="Content",
-            entry_date=datetime.datetime.now(datetime.timezone.utc),
+            entry_date=datetime.datetime.now(datetime.UTC),
         )
         db_session.add(entry)
         await db_session.flush()

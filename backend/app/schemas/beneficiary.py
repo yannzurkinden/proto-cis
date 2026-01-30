@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -13,21 +13,21 @@ class BeneficiaryBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
     date_of_birth: date
-    address: Optional[str] = None
-    postal_code: Optional[str] = Field(None, max_length=10)
-    city: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, max_length=20)
-    email: Optional[EmailStr] = None
+    address: str | None = None
+    postal_code: str | None = Field(None, max_length=10)
+    city: str | None = Field(None, max_length=100)
+    phone: str | None = Field(None, max_length=20)
+    email: EmailStr | None = None
     language: str = "fr"
 
-    ai_number: Optional[str] = Field(None, max_length=50)
-    pension_type: Optional[Literal["quarter", "half", "three_quarter", "full"]] = None
-    guardianship_status: Optional[str] = None
+    ai_number: str | None = Field(None, max_length=50)
+    pension_type: Literal["quarter", "half", "three_quarter", "full"] | None = None
+    guardianship_status: str | None = None
     entry_date: date
-    contract_type: Optional[str] = None
-    occupation_rate: Optional[Decimal] = Field(None, ge=0, le=100)
-    unit_id: Optional[int] = None
-    referent_id: Optional[int] = None
+    contract_type: str | None = None
+    occupation_rate: Decimal | None = Field(None, ge=0, le=100)
+    unit_id: int | None = None
+    referent_id: int | None = None
 
 
 class BeneficiaryCreate(BeneficiaryBase):
@@ -39,28 +39,28 @@ class BeneficiaryCreate(BeneficiaryBase):
 class BeneficiaryUpdate(BaseModel):
     """Schema for updating a beneficiary."""
 
-    first_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    last_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    date_of_birth: Optional[date] = None
-    photo_url: Optional[str] = None
-    address: Optional[str] = None
-    postal_code: Optional[str] = Field(None, max_length=10)
-    city: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, max_length=20)
-    email: Optional[EmailStr] = None
-    language: Optional[str] = None
+    first_name: str | None = Field(None, min_length=1, max_length=100)
+    last_name: str | None = Field(None, min_length=1, max_length=100)
+    date_of_birth: date | None = None
+    photo_url: str | None = None
+    address: str | None = None
+    postal_code: str | None = Field(None, max_length=10)
+    city: str | None = Field(None, max_length=100)
+    phone: str | None = Field(None, max_length=20)
+    email: EmailStr | None = None
+    language: str | None = None
 
-    ai_number: Optional[str] = Field(None, max_length=50)
-    pension_type: Optional[Literal["quarter", "half", "three_quarter", "full"]] = None
-    guardianship_status: Optional[str] = None
-    entry_date: Optional[date] = None
-    exit_date: Optional[date] = None
-    status: Optional[Literal["active", "paused", "exited"]] = None
-    contract_type: Optional[str] = None
-    occupation_rate: Optional[Decimal] = Field(None, ge=0, le=100)
-    salary: Optional[Decimal] = None
-    unit_id: Optional[int] = None
-    referent_id: Optional[int] = None
+    ai_number: str | None = Field(None, max_length=50)
+    pension_type: Literal["quarter", "half", "three_quarter", "full"] | None = None
+    guardianship_status: str | None = None
+    entry_date: date | None = None
+    exit_date: date | None = None
+    status: Literal["active", "paused", "exited"] | None = None
+    contract_type: str | None = None
+    occupation_rate: Decimal | None = Field(None, ge=0, le=100)
+    salary: Decimal | None = None
+    unit_id: int | None = None
+    referent_id: int | None = None
 
 
 class BeneficiaryStats(BaseModel):
@@ -71,7 +71,7 @@ class BeneficiaryStats(BaseModel):
     objectives_in_progress: int = 0
     objectives_overdue: int = 0
     absence_rate_30d: float = 0.0
-    last_journal_entry: Optional[date] = None
+    last_journal_entry: date | None = None
 
 
 class CurrentPAI(BaseModel):
@@ -80,7 +80,7 @@ class CurrentPAI(BaseModel):
     id: int
     status: str
     valid_from: date
-    valid_to: Optional[date] = None
+    valid_to: date | None = None
 
 
 class BeneficiaryResponse(BeneficiaryBase):
@@ -89,15 +89,15 @@ class BeneficiaryResponse(BeneficiaryBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    photo_url: Optional[str] = None
-    exit_date: Optional[date] = None
+    photo_url: str | None = None
+    exit_date: date | None = None
     status: str
-    salary: Optional[Decimal] = None
-    unit_name: Optional[str] = None
-    referent_name: Optional[str] = None
-    current_pai: Optional[CurrentPAI] = None
-    stats: Optional[BeneficiaryStats] = None
-    contacts: Optional[List["ContactResponse"]] = None
+    salary: Decimal | None = None
+    unit_name: str | None = None
+    referent_name: str | None = None
+    current_pai: CurrentPAI | None = None
+    stats: BeneficiaryStats | None = None
+    contacts: list["ContactResponse"] | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -111,14 +111,14 @@ class BeneficiaryListResponse(BaseModel):
     first_name: str
     last_name: str
     date_of_birth: date
-    photo_url: Optional[str] = None
+    photo_url: str | None = None
     status: str
-    unit_id: Optional[int] = None
-    unit_name: Optional[str] = None
-    referent_id: Optional[int] = None
-    referent_name: Optional[str] = None
+    unit_id: int | None = None
+    unit_name: str | None = None
+    referent_id: int | None = None
+    referent_name: str | None = None
     entry_date: date
-    occupation_rate: Optional[Decimal] = None
+    occupation_rate: Decimal | None = None
     objectives_in_progress: int = 0
     objectives_overdue: int = 0
 
@@ -127,10 +127,10 @@ class BeneficiaryListResponse(BaseModel):
 class MedicalDataUpdate(BaseModel):
     """Schema for updating medical data."""
 
-    medication: Optional[str] = None
-    restrictions: Optional[str] = None
-    allergies: Optional[str] = None
-    medical_notes: Optional[str] = None
+    medication: str | None = None
+    restrictions: str | None = None
+    allergies: str | None = None
+    medical_notes: str | None = None
 
 
 class MedicalDataResponse(BaseModel):
@@ -139,10 +139,10 @@ class MedicalDataResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     beneficiary_id: int
-    medication: Optional[str] = None
-    restrictions: Optional[str] = None
-    allergies: Optional[str] = None
-    medical_notes: Optional[str] = None
+    medication: str | None = None
+    restrictions: str | None = None
+    allergies: str | None = None
+    medical_notes: str | None = None
 
 
 # Contacts
@@ -151,11 +151,11 @@ class ContactBase(BaseModel):
 
     contact_type: Literal["emergency", "doctor", "psychologist", "ai_referent", "other"]
     name: str = Field(..., min_length=1, max_length=200)
-    organization: Optional[str] = Field(None, max_length=200)
-    phone: Optional[str] = Field(None, max_length=20)
-    email: Optional[EmailStr] = None
-    address: Optional[str] = None
-    notes: Optional[str] = None
+    organization: str | None = Field(None, max_length=200)
+    phone: str | None = Field(None, max_length=20)
+    email: EmailStr | None = None
+    address: str | None = None
+    notes: str | None = None
     is_emergency_contact: bool = False
 
 
@@ -168,14 +168,14 @@ class ContactCreate(ContactBase):
 class ContactUpdate(BaseModel):
     """Schema for updating a contact."""
 
-    contact_type: Optional[Literal["emergency", "doctor", "psychologist", "ai_referent", "other"]] = None
-    name: Optional[str] = Field(None, min_length=1, max_length=200)
-    organization: Optional[str] = Field(None, max_length=200)
-    phone: Optional[str] = Field(None, max_length=20)
-    email: Optional[EmailStr] = None
-    address: Optional[str] = None
-    notes: Optional[str] = None
-    is_emergency_contact: Optional[bool] = None
+    contact_type: Literal["emergency", "doctor", "psychologist", "ai_referent", "other"] | None = None
+    name: str | None = Field(None, min_length=1, max_length=200)
+    organization: str | None = Field(None, max_length=200)
+    phone: str | None = Field(None, max_length=20)
+    email: EmailStr | None = None
+    address: str | None = None
+    notes: str | None = None
+    is_emergency_contact: bool | None = None
 
 
 class ContactResponse(ContactBase):
@@ -193,7 +193,7 @@ class RiskBehaviorBase(BaseModel):
     risk_type: str = Field(..., max_length=50)
     description: str
     severity: Literal["low", "medium", "high", "critical"]
-    preventive_measures: Optional[str] = None
+    preventive_measures: str | None = None
     reported_date: date
 
 
@@ -206,11 +206,11 @@ class RiskBehaviorCreate(RiskBehaviorBase):
 class RiskBehaviorUpdate(BaseModel):
     """Schema for updating a risk behavior."""
 
-    risk_type: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = None
-    severity: Optional[Literal["low", "medium", "high", "critical"]] = None
-    preventive_measures: Optional[str] = None
-    is_active: Optional[bool] = None
+    risk_type: str | None = Field(None, max_length=50)
+    description: str | None = None
+    severity: Literal["low", "medium", "high", "critical"] | None = None
+    preventive_measures: str | None = None
+    is_active: bool | None = None
 
 
 class RiskBehaviorResponse(RiskBehaviorBase):

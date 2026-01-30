@@ -1,8 +1,6 @@
 """Tests for dashboard endpoints (/api/v1/dashboard/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── MSP Dashboard ────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 """Journal entry models."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -11,7 +11,6 @@ from app.models.base import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.beneficiary import Beneficiary
-    from app.models.user import User
 
 
 class JournalCategory(Base):
@@ -22,13 +21,13 @@ class JournalCategory(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     label: Mapped[str] = mapped_column(String(100), nullable=False)
-    color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)  # Hex color
-    icon: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    color: Mapped[str | None] = mapped_column(String(7), nullable=True)  # Hex color
+    icon: Mapped[str | None] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Relationships
-    entries: Mapped[List["JournalEntryCategory"]] = relationship(
+    entries: Mapped[list["JournalEntryCategory"]] = relationship(
         "JournalEntryCategory", back_populates="category"
     )
 
@@ -57,10 +56,10 @@ class JournalEntry(Base, TimestampMixin):
     beneficiary: Mapped["Beneficiary"] = relationship(
         "Beneficiary", back_populates="journal_entries"
     )
-    categories: Mapped[List["JournalEntryCategory"]] = relationship(
+    categories: Mapped[list["JournalEntryCategory"]] = relationship(
         "JournalEntryCategory", back_populates="entry", cascade="all, delete-orphan"
     )
-    tags: Mapped[List["JournalEntryTag"]] = relationship(
+    tags: Mapped[list["JournalEntryTag"]] = relationship(
         "JournalEntryTag", back_populates="entry", cascade="all, delete-orphan"
     )
 

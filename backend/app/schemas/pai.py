@@ -1,7 +1,7 @@
 """PAI (Plan d'Accompagnement Individualis) schemas."""
 
 from datetime import date, datetime
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,10 +10,10 @@ class PAIBase(BaseModel):
     """Base PAI schema."""
 
     valid_from: date
-    valid_to: Optional[date] = None
-    strengths: Optional[str] = None
-    difficulties: Optional[str] = None
-    beneficiary_wishes: Optional[str] = None
+    valid_to: date | None = None
+    strengths: str | None = None
+    difficulties: str | None = None
+    beneficiary_wishes: str | None = None
 
 
 class PAICreate(PAIBase):
@@ -25,12 +25,12 @@ class PAICreate(PAIBase):
 class PAIUpdate(BaseModel):
     """Schema for updating a PAI."""
 
-    valid_from: Optional[date] = None
-    valid_to: Optional[date] = None
-    strengths: Optional[str] = None
-    difficulties: Optional[str] = None
-    beneficiary_wishes: Optional[str] = None
-    status: Optional[Literal["draft", "active", "closed"]] = None
+    valid_from: date | None = None
+    valid_to: date | None = None
+    strengths: str | None = None
+    difficulties: str | None = None
+    beneficiary_wishes: str | None = None
+    status: Literal["draft", "active", "closed"] | None = None
 
 
 class ObjectiveSummary(BaseModel):
@@ -42,7 +42,7 @@ class ObjectiveSummary(BaseModel):
     term: str
     status: str
     progress: int
-    due_date: Optional[date] = None
+    due_date: date | None = None
 
 
 class PAIResponse(PAIBase):
@@ -53,7 +53,7 @@ class PAIResponse(PAIBase):
     id: int
     beneficiary_id: int
     status: str
-    objectives: Optional[List[ObjectiveSummary]] = None
+    objectives: list[ObjectiveSummary] | None = None
     created_at: datetime
-    created_by: Optional[int] = None
-    created_by_name: Optional[str] = None
+    created_by: int | None = None
+    created_by_name: str | None = None

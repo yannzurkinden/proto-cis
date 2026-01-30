@@ -1,13 +1,11 @@
 """Audit logging middleware for tracking sensitive operations."""
 
 import time
-from typing import Optional
 
+import structlog
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.types import ASGIApp
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -143,7 +141,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
         parts = path.replace("/api/v1/", "").split("/")
         return parts[0] if parts else "unknown"
 
-    def _extract_resource_id(self, path: str) -> Optional[int]:
+    def _extract_resource_id(self, path: str) -> int | None:
         """Extract numeric resource ID from the URL path."""
         parts = path.split("/")
         for part in parts:
@@ -156,10 +154,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
     def _should_audit(self, method: str, path: str) -> bool:
         """Check if this request should be audited."""
         paths = AUDIT_PATHS.get(method, [])
-        for audit_path in paths:
-            if path.startswith(audit_path) or path == audit_path:
-                return True
-        return False
+        return any(path.startswith(audit_path) or path == audit_path for audit_path in paths)
 
     def _is_medical_access(self, path: str) -> bool:
         """Check if this request accesses medical data."""

@@ -2,7 +2,7 @@
 
 import io
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -12,10 +12,10 @@ from app.database import get_db
 from app.dependencies import require_management, require_msp_or_above
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
+from app.repositories.journal_repository import JournalRepository
 from app.repositories.objective_repository import ObjectiveRepository
 from app.repositories.skill_repository import SkillRepository
 from app.repositories.time_tracking_repository import TimeTrackingRepository
-from app.repositories.journal_repository import JournalRepository
 from app.services.pdf import PDFService
 
 router = APIRouter()
@@ -133,9 +133,9 @@ async def generate_beneficiary_summary(
 async def generate_activity_report(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
+    unit_id: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
 ):
     """Generate an activity report (management only)."""
     import openpyxl
@@ -172,7 +172,7 @@ async def generate_activity_report(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 
@@ -223,8 +223,8 @@ async def generate_activity_report(
 async def export_objectives(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    status_filter: Optional[str] = Query(None, alias="status"),
+    unit_id: int | None = None,
+    status_filter: str | None = Query(None, alias="status"),
 ):
     """Export objectives as an Excel file (management only)."""
     import openpyxl
@@ -263,7 +263,7 @@ async def export_objectives(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 
@@ -316,8 +316,8 @@ async def export_objectives(
 async def export_absenteeism(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    year: Optional[int] = None,
+    unit_id: int | None = None,
+    year: int | None = None,
 ):
     """Export absence statistics as an Excel file (management only)."""
     import openpyxl
@@ -358,7 +358,7 @@ async def export_absenteeism(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 

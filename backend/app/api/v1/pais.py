@@ -1,6 +1,6 @@
 """PAI (Plan d'Accompagnement Individualis) endpoints."""
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +10,7 @@ from app.dependencies import get_current_user, require_msp_or_above
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
 from app.repositories.pai_repository import PAIRepository
-from app.schemas.pai import PAICreate, PAIUpdate, PAIResponse, ObjectiveSummary
-from app.schemas.common import Message
+from app.schemas.pai import ObjectiveSummary, PAICreate, PAIResponse, PAIUpdate
 
 router = APIRouter()
 
@@ -209,7 +208,7 @@ async def close_pai(
 
 
 # Beneficiary PAI endpoints (nested under beneficiaries)
-from fastapi import APIRouter as NestedRouter
+from fastapi import APIRouter as NestedRouter  # noqa: E402
 
 beneficiary_pais_router = NestedRouter()
 
@@ -219,7 +218,7 @@ async def list_beneficiary_pais(
     beneficiary_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    pai_status: Optional[str] = Query(None, alias="status"),
+    pai_status: str | None = Query(None, alias="status"),
 ):
     """List all PAIs for a beneficiary."""
     beneficiary_repo = BeneficiaryRepository(db)

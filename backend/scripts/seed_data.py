@@ -10,7 +10,7 @@ Usage:
 import asyncio
 import random
 import sys
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 
 sys.path.insert(0, ".")
@@ -33,7 +33,7 @@ from app.utils.security import get_password_hash
 # ---------------------------------------------------------------------------
 
 TODAY = date.today()
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 
 USERS_DATA = [
     # (email, first_name, last_name, role, unit_name)
@@ -258,7 +258,7 @@ def random_past_datetime(days_back: int = 90) -> datetime:
     d = random_past_date(days_back)
     h = random.randint(8, 16)
     m = random.choice([0, 15, 30, 45])
-    return datetime(d.year, d.month, d.day, h, m, tzinfo=timezone.utc)
+    return datetime(d.year, d.month, d.day, h, m, tzinfo=UTC)
 
 
 # ---------------------------------------------------------------------------
@@ -312,7 +312,7 @@ async def seed():
         # 3. Create beneficiaries
         # ------------------------------------------------------------------
         beneficiaries: list[Beneficiary] = []
-        for i, (first, last, dob, city, postal, phone, ai_num, pension, status, occ_rate, unit_name, msp_email) in enumerate(BENEFICIARIES_DATA):
+        for _i, (first, last, dob, city, postal, phone, ai_num, pension, status, occ_rate, unit_name, msp_email) in enumerate(BENEFICIARIES_DATA):
             entry_date = TODAY - timedelta(days=random.randint(90, 730))
             exit_date = (TODAY - timedelta(days=random.randint(1, 30))) if status == "exited" else None
 
@@ -663,7 +663,7 @@ async def seed():
         # ------------------------------------------------------------------
         rb_count = 0
         risk_beneficiaries = random.sample(active_beneficiaries, min(4, len(active_beneficiaries)))
-        for i, b in enumerate(risk_beneficiaries):
+        for _i, b in enumerate(risk_beneficiaries):
             # 1-2 risk behaviors per selected beneficiary
             num_risks = random.randint(1, 2)
             selected_risks = random.sample(RISK_BEHAVIORS_DATA, num_risks)
@@ -691,8 +691,8 @@ async def seed():
         print("\n--- Seed completed successfully! ---")
         print(f"Users: {len(USERS_DATA) + 1} (including admin)")
         print(f"Beneficiaries: {len(beneficiaries)}")
-        print(f"Login with any user: email / User1234!@#$")
-        print(f"Admin login: admin@cis.local / Admin123!@#$")
+        print("Login with any user: email / User1234!@#$")
+        print("Admin login: admin@cis.local / Admin123!@#$")
 
 
 if __name__ == "__main__":

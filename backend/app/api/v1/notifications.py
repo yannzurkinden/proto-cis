@@ -1,18 +1,17 @@
 """Notification endpoints."""
 
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
 from app.repositories.notification_repository import NotificationRepository
-from app.schemas.common import PaginatedResponse, Message
-
-from pydantic import BaseModel, ConfigDict
+from app.schemas.common import Message, PaginatedResponse
 
 router = APIRouter()
 
@@ -29,10 +28,10 @@ class NotificationResponse(BaseModel):
     user_id: int
     notification_type: str
     title: str
-    message: Optional[str] = None
-    link: Optional[str] = None
+    message: str | None = None
+    link: str | None = None
     is_read: bool = False
-    read_at: Optional[datetime] = None
+    read_at: datetime | None = None
     created_at: datetime
 
 

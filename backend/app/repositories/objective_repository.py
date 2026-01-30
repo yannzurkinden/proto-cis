@@ -1,14 +1,13 @@
 """Objective repository for database operations."""
 
-from datetime import date, datetime, timezone
-from typing import List, Optional
+from datetime import UTC, date, datetime
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.objective import Objective, ObjectiveIndicator, Action
 from app.models.beneficiary import Beneficiary
+from app.models.objective import Action, Objective, ObjectiveIndicator
 from app.repositories.base import BaseRepository
 
 
@@ -18,7 +17,7 @@ class ObjectiveRepository(BaseRepository[Objective]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Objective)
 
-    async def get_by_id_with_relations(self, id: int) -> Optional[Objective]:
+    async def get_by_id_with_relations(self, id: int) -> Objective | None:
         """Get objective by ID with all relations loaded."""
         result = await self.db.execute(
             select(Objective)
@@ -35,14 +34,14 @@ class ObjectiveRepository(BaseRepository[Objective]):
         self,
         skip: int = 0,
         limit: int = 20,
-        beneficiary_id: Optional[int] = None,
-        pai_id: Optional[int] = None,
-        status: Optional[str] = None,
-        objective_type: Optional[str] = None,
-        term: Optional[str] = None,
-        overdue: Optional[bool] = None,
-        unit_id: Optional[int] = None,
-    ) -> tuple[List[Objective], int]:
+        beneficiary_id: int | None = None,
+        pai_id: int | None = None,
+        status: str | None = None,
+        objective_type: str | None = None,
+        term: str | None = None,
+        overdue: bool | None = None,
+        unit_id: int | None = None,
+    ) -> tuple[list[Objective], int]:
         """Get all objectives with filtering and pagination."""
         query = (
             select(Objective)
@@ -88,8 +87,8 @@ class ObjectiveRepository(BaseRepository[Objective]):
     async def get_by_beneficiary(
         self,
         beneficiary_id: int,
-        status: Optional[str] = None,
-    ) -> List[Objective]:
+        status: str | None = None,
+    ) -> list[Objective]:
         """Get all objectives for a beneficiary."""
         query = (
             select(Objective)
@@ -109,9 +108,9 @@ class ObjectiveRepository(BaseRepository[Objective]):
 
     async def get_overdue_objectives(
         self,
-        unit_id: Optional[int] = None,
-        referent_id: Optional[int] = None,
-    ) -> List[Objective]:
+        unit_id: int | None = None,
+        referent_id: int | None = None,
+    ) -> list[Objective]:
         """Get overdue objectives."""
         query = (
             select(Objective)
@@ -133,8 +132,8 @@ class ObjectiveRepository(BaseRepository[Objective]):
     async def create_objective(
         self,
         data: dict,
-        indicators: Optional[List[dict]] = None,
-        actions: Optional[List[dict]] = None,
+        indicators: list[dict] | None = None,
+        actions: list[dict] | None = None,
         created_by: int = None,
     ) -> Objective:
         """Create a new objective with indicators and actions."""
@@ -195,7 +194,7 @@ class ObjectiveRepository(BaseRepository[Objective]):
         return objective
 
     # Indicator operations
-    async def get_indicator_by_id(self, indicator_id: int) -> Optional[ObjectiveIndicator]:
+    async def get_indicator_by_id(self, indicator_id: int) -> ObjectiveIndicator | None:
         """Get indicator by ID."""
         result = await self.db.execute(
             select(ObjectiveIndicator).where(ObjectiveIndicator.id == indicator_id)
@@ -205,12 +204,12 @@ class ObjectiveRepository(BaseRepository[Objective]):
     async def achieve_indicator(self, indicator: ObjectiveIndicator) -> ObjectiveIndicator:
         """Mark an indicator as achieved."""
         indicator.is_achieved = True
-        indicator.achieved_at = datetime.now(timezone.utc)
+        indicator.achieved_at = datetime.now(UTC)
         await self.db.flush()
         return indicator
 
     # Action operations
-    async def get_action_by_id(self, action_id: int) -> Optional[Action]:
+    async def get_action_by_id(self, action_id: int) -> Action | None:
         """Get action by ID."""
         result = await self.db.execute(
             select(Action).where(Action.id == action_id)
@@ -241,7 +240,7 @@ class ObjectiveRepository(BaseRepository[Objective]):
 
     async def get_objectives_stats(
         self,
-        unit_id: Optional[int] = None,
+        unit_id: int | None = None,
     ) -> dict:
         """Get statistics for objectives."""
         query = select(

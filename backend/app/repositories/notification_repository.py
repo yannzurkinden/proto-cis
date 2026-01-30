@@ -1,12 +1,11 @@
 """Notification repository for database operations."""
 
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.audit import Notification, AuditLog
+from app.models.audit import AuditLog, Notification
 from app.repositories.base import BaseRepository
 
 
@@ -22,7 +21,7 @@ class NotificationRepository(BaseRepository[Notification]):
         unread_only: bool = False,
         skip: int = 0,
         limit: int = 20,
-    ) -> tuple[List[Notification], int]:
+    ) -> tuple[list[Notification], int]:
         """Get notifications for a user with filtering and pagination."""
         query = select(Notification).where(Notification.user_id == user_id)
 
@@ -59,7 +58,7 @@ class NotificationRepository(BaseRepository[Notification]):
 
         if notification:
             notification.is_read = True
-            notification.read_at = datetime.now(timezone.utc)
+            notification.read_at = datetime.now(UTC)
             await self.db.flush()
             await self.db.refresh(notification)
 
@@ -71,7 +70,7 @@ class NotificationRepository(BaseRepository[Notification]):
             update(Notification)
             .where(Notification.user_id == user_id)
             .where(Notification.is_read == False)
-            .values(is_read=True, read_at=datetime.now(timezone.utc))
+            .values(is_read=True, read_at=datetime.now(UTC))
         )
         await self.db.flush()
         return result.rowcount
@@ -81,8 +80,8 @@ class NotificationRepository(BaseRepository[Notification]):
         user_id: int,
         notification_type: str,
         title: str,
-        message: Optional[str] = None,
-        link: Optional[str] = None,
+        message: str | None = None,
+        link: str | None = None,
     ) -> Notification:
         """Create a new notification."""
         notification = Notification(
@@ -106,14 +105,14 @@ class AuditLogRepository:
 
     async def create_log(
         self,
-        user_id: Optional[int],
+        user_id: int | None,
         action: str,
         resource_type: str,
-        resource_id: Optional[int] = None,
-        old_values: Optional[dict] = None,
-        new_values: Optional[dict] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
+        resource_id: int | None = None,
+        old_values: dict | None = None,
+        new_values: dict | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
     ) -> AuditLog:
         """Create a new audit log entry."""
         log = AuditLog(
@@ -133,14 +132,14 @@ class AuditLogRepository:
 
     async def get_logs_filtered(
         self,
-        user_id: Optional[int] = None,
-        action: Optional[str] = None,
-        resource_type: Optional[str] = None,
-        date_from: Optional[datetime] = None,
-        date_to: Optional[datetime] = None,
+        user_id: int | None = None,
+        action: str | None = None,
+        resource_type: str | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
         skip: int = 0,
         limit: int = 50,
-    ) -> tuple[List[AuditLog], int]:
+    ) -> tuple[list[AuditLog], int]:
         """Get audit logs with filtering and pagination."""
         query = select(AuditLog)
 

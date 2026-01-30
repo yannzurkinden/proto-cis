@@ -1,8 +1,6 @@
 """Tests for beneficiary management endpoints (/api/v1/beneficiaries/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── List beneficiaries ───────────────────────────────────────────────────────
 

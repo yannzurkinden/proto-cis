@@ -1,19 +1,18 @@
 """Document management endpoints."""
 
 import uuid
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
-from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_msp_or_above
 from app.models.user import User
-from app.repositories.document_repository import DocumentRepository
 from app.repositories.beneficiary_repository import BeneficiaryRepository
-from app.schemas.document import DocumentCreate, DocumentUpdate, DocumentResponse
+from app.repositories.document_repository import DocumentRepository
 from app.schemas.common import PaginatedResponse
+from app.schemas.document import DocumentResponse, DocumentUpdate
 
 router = APIRouter()
 
@@ -24,9 +23,9 @@ async def list_documents(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    beneficiary_id: Optional[int] = None,
-    document_type: Optional[str] = None,
-    confidentiality: Optional[str] = None,
+    beneficiary_id: int | None = None,
+    document_type: str | None = None,
+    confidentiality: str | None = None,
 ):
     """List all documents with filtering and pagination."""
     document_repo = DocumentRepository(db)
@@ -79,12 +78,11 @@ async def get_document(
         )
 
     # Check access based on confidentiality
-    if document.confidentiality == "highly_confidential":
-        if current_user.role not in ["ADMIN", "RUA"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to highly confidential document",
-            )
+    if document.confidentiality == "highly_confidential" and current_user.role not in ["ADMIN", "RUA"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to highly confidential document",
+        )
 
     return DocumentResponse.model_validate(document)
 
@@ -93,12 +91,12 @@ async def get_document(
 async def upload_document(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_msp_or_above)],
-    file: UploadFile = File(...),
-    beneficiary_id: Optional[int] = Form(None),
+    file: UploadFile = File(...),  # noqa: B008
+    beneficiary_id: int | None = Form(None),
     document_type: str = Form(...),
-    document_date: Optional[str] = Form(None),
+    document_date: str | None = Form(None),
     confidentiality: str = Form("standard"),
-    description: Optional[str] = Form(None),
+    description: str | None = Form(None),
 ):
     """Upload a new document."""
     # Validate beneficiary exists if provided
@@ -159,12 +157,11 @@ async def download_document(
         )
 
     # Check access based on confidentiality
-    if document.confidentiality == "highly_confidential":
-        if current_user.role not in ["ADMIN", "RUA"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to highly confidential document",
-            )
+    if document.confidentiality == "highly_confidential" and current_user.role not in ["ADMIN", "RUA"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to highly confidential document",
+        )
 
     # In a real implementation, this would stream from MinIO
     # For now, return a placeholder response

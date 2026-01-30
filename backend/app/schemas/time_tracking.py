@@ -2,9 +2,9 @@
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import List, Literal, Optional
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 # Time Entries
@@ -12,10 +12,10 @@ class TimeEntryBase(BaseModel):
     """Base time entry schema."""
 
     entry_date: date
-    time_in: Optional[time] = None
-    time_out: Optional[time] = None
+    time_in: time | None = None
+    time_out: time | None = None
     entry_type: Literal["work", "training", "appointment"] = "work"
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class TimeEntryCreate(TimeEntryBase):
@@ -27,10 +27,10 @@ class TimeEntryCreate(TimeEntryBase):
 class TimeEntryUpdate(BaseModel):
     """Schema for updating a time entry."""
 
-    time_in: Optional[time] = None
-    time_out: Optional[time] = None
-    entry_type: Optional[Literal["work", "training", "appointment"]] = None
-    notes: Optional[str] = None
+    time_in: time | None = None
+    time_out: time | None = None
+    entry_type: Literal["work", "training", "appointment"] | None = None
+    notes: str | None = None
 
 
 class TimeEntryResponse(TimeEntryBase):
@@ -40,7 +40,7 @@ class TimeEntryResponse(TimeEntryBase):
 
     id: int
     beneficiary_id: int
-    hours_worked: Optional[Decimal] = None
+    hours_worked: Decimal | None = None
 
 
 # Absences
@@ -50,7 +50,7 @@ class AbsenceBase(BaseModel):
     absence_type: Literal["sick", "vacation", "accident", "unauthorized", "other"]
     start_date: date
     end_date: date
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class AbsenceCreate(AbsenceBase):
@@ -62,10 +62,10 @@ class AbsenceCreate(AbsenceBase):
 class AbsenceUpdate(BaseModel):
     """Schema for updating an absence."""
 
-    absence_type: Optional[Literal["sick", "vacation", "accident", "unauthorized", "other"]] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    notes: Optional[str] = None
+    absence_type: Literal["sick", "vacation", "accident", "unauthorized", "other"] | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    notes: str | None = None
 
 
 class AbsenceResponse(AbsenceBase):
@@ -75,9 +75,9 @@ class AbsenceResponse(AbsenceBase):
 
     id: int
     beneficiary_id: int
-    justification_document_id: Optional[int] = None
-    validated_by: Optional[int] = None
-    validated_at: Optional[datetime] = None
+    justification_document_id: int | None = None
+    validated_by: int | None = None
+    validated_at: datetime | None = None
     duration_days: int
 
 
@@ -108,4 +108,4 @@ class AbsenceStatsResponse(BaseModel):
     total_days: int
     by_type: dict
     absence_rate: float
-    monthly_breakdown: List[MonthlyAbsence] = []
+    monthly_breakdown: list[MonthlyAbsence] = []

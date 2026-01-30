@@ -11,18 +11,18 @@ Usage:
 
 import asyncio
 import sys
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import UTC, date, datetime, time
 from decimal import Decimal
 
 sys.path.insert(0, ".")
 
 from sqlalchemy import select
 
-from app.database import AsyncSessionLocal, engine
+from app.database import AsyncSessionLocal
 from app.models import (
+    PAI,
     Absence,
     Action,
-    AuditLog,
     Beneficiary,
     BeneficiaryMedicalData,
     BeneficiarySkill,
@@ -34,18 +34,14 @@ from app.models import (
     Notification,
     Objective,
     ObjectiveIndicator,
-    PAI,
-    RiskBehavior,
     Skill,
     TimeEntry,
-    Training,
     Unit,
     User,
     VacationBalance,
 )
 from app.utils.encryption import encrypt_data
 from app.utils.security import get_password_hash
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -71,7 +67,7 @@ async def get_or_create(session, model, defaults=None, **filter_kwargs):
 
 def _dt(year, month, day, hour=10, minute=0):
     """Crée un datetime timezone-aware (UTC)."""
-    return datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+    return datetime(year, month, day, hour, minute, tzinfo=UTC)
 
 
 # ---------------------------------------------------------------------------

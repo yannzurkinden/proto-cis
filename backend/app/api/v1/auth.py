@@ -1,7 +1,8 @@
 """Authentication endpoints."""
 
+import contextlib
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -14,23 +15,23 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
+from app.schemas.common import Message
 from app.schemas.user import (
-    LoginRequest,
-    Token,
-    RefreshResponse,
-    PasswordChange,
     ForgotPassword,
+    LoginRequest,
+    PasswordChange,
     PasswordReset,
+    RefreshResponse,
+    Token,
     UserMeResponse,
 )
-from app.schemas.common import Message
 from app.utils.security import (
-    verify_password,
-    get_password_hash,
     create_access_token,
     create_refresh_token,
     decode_refresh_token,
+    get_password_hash,
     validate_password_strength,
+    verify_password,
 )
 
 logger = logging.getLogger(__name__)
@@ -111,7 +112,6 @@ async def refresh_token(
 ):
     """Refresh access token using refresh token from cookie."""
     # Try to get refresh token from cookie first, then from header
-    from fastapi import Request
     # Note: In a real implementation, you'd get this from the request context
     # For now, we'll use the authorization header as fallback
 
@@ -204,24 +204,22 @@ async def forgot_password(
     # Always return success to prevent email enumeration
     if user:
         # Generate a self-contained password reset token (JWT, 1-hour expiry)
-        reset_token = jwt.encode(
+        _reset_token = jwt.encode(
             {
                 "sub": str(user.id),
                 "type": "reset",
-                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+                "exp": datetime.now(UTC) + timedelta(hours=1),
             },
             settings.secret_key,
             algorithm=settings.algorithm,
         )
         # Send password reset email if SMTP is configured
         if settings.smtp_host:
-            try:
+            with contextlib.suppress(Exception):
                 # Full email service integration pending
                 logger.info(
                     "Password reset token generated for user %s", user.email
                 )
-            except Exception:
-                pass  # Silently fail to prevent email enumeration
         else:
             logger.debug(
                 "SMTP not configured; reset token generated but not sent for user %s",
@@ -255,11 +253,11 @@ async def reset_password(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid reset token",
             )
-    except JWTError:
+    except JWTError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset token",
-        )
+        ) from err
 
     # Validate new password strength
     is_valid, error_message = validate_password_strength(data.new_password)

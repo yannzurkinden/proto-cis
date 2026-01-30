@@ -1,8 +1,6 @@
 """Tests for objective management endpoints (/api/v1/objectives/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 

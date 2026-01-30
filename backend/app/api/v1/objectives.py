@@ -1,7 +1,7 @@
 """Objective management endpoints."""
 
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,23 +9,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_current_user, require_msp_or_above
 from app.models.user import User
-from app.repositories.objective_repository import ObjectiveRepository
 from app.repositories.beneficiary_repository import BeneficiaryRepository
+from app.repositories.objective_repository import ObjectiveRepository
+from app.schemas.common import PaginatedResponse
 from app.schemas.objective import (
-    ObjectiveCreate,
-    ObjectiveUpdate,
-    ObjectiveResponse,
-    ObjectiveProgressUpdate,
-    ObjectiveStatusUpdate,
     ActionCreate,
-    ActionUpdate,
     ActionResponse,
-    IndicatorResponse,
-    ObjectivesOverviewResponse,
-    ObjectiveOverview,
+    ActionUpdate,
     BeneficiaryObjectives,
+    IndicatorResponse,
+    ObjectiveCreate,
+    ObjectiveOverview,
+    ObjectiveProgressUpdate,
+    ObjectiveResponse,
+    ObjectivesOverviewResponse,
+    ObjectiveStatusUpdate,
+    ObjectiveUpdate,
 )
-from app.schemas.common import PaginatedResponse, Message
 
 router = APIRouter()
 
@@ -36,12 +36,12 @@ async def list_objectives(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    beneficiary_id: Optional[int] = None,
-    pai_id: Optional[int] = None,
-    status: Optional[str] = None,
-    objective_type: Optional[str] = None,
-    term: Optional[str] = None,
-    overdue: Optional[bool] = None,
+    beneficiary_id: int | None = None,
+    pai_id: int | None = None,
+    status: str | None = None,
+    objective_type: str | None = None,
+    term: str | None = None,
+    overdue: bool | None = None,
 ):
     """List all objectives with filtering and pagination."""
     objective_repo = ObjectiveRepository(db)
@@ -109,7 +109,7 @@ async def list_objectives(
 async def get_objectives_overview(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    unit_id: Optional[int] = None,
+    unit_id: int | None = None,
 ):
     """Get overview of all objectives with summary statistics."""
     objective_repo = ObjectiveRepository(db)

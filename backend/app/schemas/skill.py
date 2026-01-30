@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,17 +12,17 @@ class SkillCreate(BaseModel):
     """Schema for creating a skill."""
 
     name: str = Field(..., max_length=100)
-    category: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = None
+    category: str | None = Field(None, max_length=50)
+    description: str | None = None
 
 
 class SkillUpdate(BaseModel):
     """Schema for updating a skill."""
 
-    name: Optional[str] = Field(None, max_length=100)
-    category: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = Field(None, max_length=100)
+    category: str | None = Field(None, max_length=50)
+    description: str | None = None
+    is_active: bool | None = None
 
 
 class SkillResponse(BaseModel):
@@ -32,8 +32,8 @@ class SkillResponse(BaseModel):
 
     id: int
     name: str
-    category: Optional[str] = None
-    description: Optional[str] = None
+    category: str | None = None
+    description: str | None = None
     is_active: bool = True
     sort_order: int = 0
 
@@ -43,7 +43,7 @@ class BeneficiarySkillEvaluate(BaseModel):
     """Schema for evaluating a beneficiary's skill."""
 
     level: Literal["not_acquired", "in_progress", "acquired", "mastered"]
-    comments: Optional[str] = None
+    comments: str | None = None
 
 
 class BeneficiarySkillResponse(BaseModel):
@@ -53,11 +53,11 @@ class BeneficiarySkillResponse(BaseModel):
 
     id: int
     skill_id: int
-    skill_name: Optional[str] = None
+    skill_name: str | None = None
     level: str
     evaluation_date: date
-    evaluated_by: Optional[int] = None
-    comments: Optional[str] = None
+    evaluated_by: int | None = None
+    comments: str | None = None
 
 
 # Training schemas
@@ -66,19 +66,19 @@ class TrainingCreate(BaseModel):
 
     title: str = Field(..., max_length=255)
     training_date: date
-    duration_hours: Optional[Decimal] = None
-    trainer: Optional[str] = Field(None, max_length=200)
-    comments: Optional[str] = None
+    duration_hours: Decimal | None = None
+    trainer: str | None = Field(None, max_length=200)
+    comments: str | None = None
 
 
 class TrainingUpdate(BaseModel):
     """Schema for updating a training."""
 
-    title: Optional[str] = Field(None, max_length=255)
-    training_date: Optional[date] = None
-    duration_hours: Optional[Decimal] = None
-    trainer: Optional[str] = Field(None, max_length=200)
-    comments: Optional[str] = None
+    title: str | None = Field(None, max_length=255)
+    training_date: date | None = None
+    duration_hours: Decimal | None = None
+    trainer: str | None = Field(None, max_length=200)
+    comments: str | None = None
 
 
 class TrainingResponse(BaseModel):
@@ -90,7 +90,7 @@ class TrainingResponse(BaseModel):
     beneficiary_id: int
     title: str
     training_date: date
-    duration_hours: Optional[Decimal] = None
-    trainer: Optional[str] = None
-    comments: Optional[str] = None
+    duration_hours: Decimal | None = None
+    trainer: str | None = None
+    comments: str | None = None
     created_at: datetime

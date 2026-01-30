@@ -1,8 +1,6 @@
 """Tests for notification endpoints (/api/v1/notifications/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── List notifications ───────────────────────────────────────────────────────
 

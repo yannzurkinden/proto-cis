@@ -119,17 +119,6 @@ export function AdminPage() {
 
   // Check access
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'RUA'
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <Shield className="mb-4 h-16 w-16 text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Accès refusé</h1>
-        <p className="text-muted-foreground">
-          Vous n'avez pas les droits pour accéder à cette page.
-        </p>
-      </div>
-    )
-  }
 
   // Queries
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -277,6 +266,18 @@ export function AdminPage() {
     } catch {
       return dateStr
     }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <Shield className="mb-4 h-16 w-16 text-muted-foreground" />
+        <h1 className="text-2xl font-bold">Accès refusé</h1>
+        <p className="text-muted-foreground">
+          Vous n'avez pas les droits pour accéder à cette page.
+        </p>
+      </div>
+    )
   }
 
   return (

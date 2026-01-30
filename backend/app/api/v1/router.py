@@ -5,18 +5,18 @@ from fastapi import APIRouter
 from app.api.v1 import (
     admin,
     auth,
-    users,
-    units,
     beneficiaries,
-    pais,
-    objectives,
-    journal,
-    documents,
     dashboard,
+    documents,
+    journal,
     notifications,
+    objectives,
+    pais,
     reports,
     skills,
     time_tracking,
+    units,
+    users,
 )
 
 api_router = APIRouter()

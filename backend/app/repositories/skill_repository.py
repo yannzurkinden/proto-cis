@@ -1,13 +1,12 @@
 """Skill repository for database operations."""
 
 from datetime import date
-from typing import List, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.skill import Skill, BeneficiarySkill, Training
+from app.models.skill import BeneficiarySkill, Skill, Training
 from app.repositories.base import BaseRepository
 
 
@@ -17,7 +16,7 @@ class SkillRepository(BaseRepository[Skill]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Skill)
 
-    async def get_all_active(self) -> List[Skill]:
+    async def get_all_active(self) -> list[Skill]:
         """Get all active skills ordered by sort_order."""
         result = await self.db.execute(
             select(Skill)
@@ -26,7 +25,7 @@ class SkillRepository(BaseRepository[Skill]):
         )
         return list(result.scalars().all())
 
-    async def get_by_category(self, category: str) -> List[Skill]:
+    async def get_by_category(self, category: str) -> list[Skill]:
         """Get skills by category."""
         result = await self.db.execute(
             select(Skill)
@@ -38,7 +37,7 @@ class SkillRepository(BaseRepository[Skill]):
 
     # BeneficiarySkill operations
 
-    async def get_beneficiary_skills(self, beneficiary_id: int) -> List[BeneficiarySkill]:
+    async def get_beneficiary_skills(self, beneficiary_id: int) -> list[BeneficiarySkill]:
         """Get all skill evaluations for a beneficiary."""
         result = await self.db.execute(
             select(BeneficiarySkill)
@@ -54,7 +53,7 @@ class SkillRepository(BaseRepository[Skill]):
         skill_id: int,
         level: str,
         evaluated_by: int,
-        comments: Optional[str] = None,
+        comments: str | None = None,
     ) -> BeneficiarySkill:
         """Create or update a skill evaluation for a beneficiary (upsert)."""
         existing = await self.get_beneficiary_skill(beneficiary_id, skill_id)
@@ -85,7 +84,7 @@ class SkillRepository(BaseRepository[Skill]):
         self,
         beneficiary_id: int,
         skill_id: int,
-    ) -> Optional[BeneficiarySkill]:
+    ) -> BeneficiarySkill | None:
         """Get a specific skill evaluation for a beneficiary."""
         result = await self.db.execute(
             select(BeneficiarySkill)
@@ -96,7 +95,7 @@ class SkillRepository(BaseRepository[Skill]):
 
     # Training operations
 
-    async def get_trainings(self, beneficiary_id: int) -> List[Training]:
+    async def get_trainings(self, beneficiary_id: int) -> list[Training]:
         """Get all trainings for a beneficiary."""
         result = await self.db.execute(
             select(Training)
@@ -105,7 +104,7 @@ class SkillRepository(BaseRepository[Skill]):
         )
         return list(result.scalars().all())
 
-    async def get_training_by_id(self, training_id: int) -> Optional[Training]:
+    async def get_training_by_id(self, training_id: int) -> Training | None:
         """Get a training by ID."""
         result = await self.db.execute(
             select(Training).where(Training.id == training_id)

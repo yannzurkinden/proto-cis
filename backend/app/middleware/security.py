@@ -3,7 +3,6 @@
 import re
 import time
 from collections import defaultdict
-from typing import Dict, Tuple
 
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
@@ -48,7 +47,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.requests_per_minute = requests_per_minute
         self.login_per_minute = login_per_minute
-        self._requests: Dict[str, list] = defaultdict(list)
+        self._requests: dict[str, list] = defaultdict(list)
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
@@ -113,7 +112,4 @@ def sanitize_string(value: str) -> str:
 
 def check_xss(value: str) -> bool:
     """Check if a string contains potential XSS patterns."""
-    for pattern in XSS_PATTERNS:
-        if pattern.search(value):
-            return True
-    return False
+    return any(pattern.search(value) for pattern in XSS_PATTERNS)

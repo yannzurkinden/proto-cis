@@ -2,14 +2,14 @@
 
 import asyncio
 import sys
+
 sys.path.insert(0, ".")
 
-from sqlalchemy import text
 
-from app.database import engine, AsyncSessionLocal
-from app.models.user import User
-from app.models.unit import Unit
+from app.database import AsyncSessionLocal
 from app.models.journal import JournalCategory
+from app.models.unit import Unit
+from app.models.user import User
 from app.utils.security import get_password_hash
 
 

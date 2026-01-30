@@ -1,8 +1,6 @@
 """Tests for user management endpoints (/api/v1/users/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── Get current user (me) ────────────────────────────────────────────────────
 

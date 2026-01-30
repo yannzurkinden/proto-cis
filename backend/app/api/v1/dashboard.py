@@ -1,10 +1,10 @@
 """Dashboard endpoints."""
 
-from datetime import date, datetime, timezone
-from typing import Annotated, Optional
+from datetime import UTC, date, datetime
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -13,18 +13,17 @@ from app.models.beneficiary import Beneficiary
 from app.models.objective import Objective
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
-from app.repositories.objective_repository import ObjectiveRepository
 from app.repositories.journal_repository import JournalRepository
+from app.repositories.objective_repository import ObjectiveRepository
 from app.schemas.dashboard import (
-    MSPDashboardResponse,
-    ManagementDashboardResponse,
-    BeneficiarySummary,
-    ReminderItem,
-    BeneficiarySummaryStats,
-    ObjectivesOverviewSummary,
     AbsenceStatsSummary,
-    UnitStats,
     Alert,
+    BeneficiarySummary,
+    BeneficiarySummaryStats,
+    ManagementDashboardResponse,
+    MSPDashboardResponse,
+    ObjectivesOverviewSummary,
+    ReminderItem,
 )
 
 router = APIRouter()
@@ -114,7 +113,7 @@ async def get_msp_dashboard(
 async def get_management_dashboard(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
+    unit_id: int | None = None,
 ):
     """Get management dashboard data."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -160,7 +159,7 @@ async def get_management_dashboard(
     first_of_month = date.today().replace(day=1)
     first_of_month_dt = datetime(
         first_of_month.year, first_of_month.month, first_of_month.day,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
     # Count new beneficiaries this month (entry_date >= first of month)
