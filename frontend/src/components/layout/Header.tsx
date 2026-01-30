@@ -44,19 +44,48 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={() => navigate('/notifications')}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
+                  </span>
+                )}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {unreadCount === 0 ? (
+                <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                  Aucune notification
+                </div>
+              ) : (
+                <div className="px-2 py-2 text-center text-sm text-muted-foreground">
+                  Vous avez {unreadCount} notification{unreadCount > 1 ? 's' : ''} non lue{unreadCount > 1 ? 's' : ''}
+                </div>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/notifications')}>
+                <span className="w-full text-center text-sm font-medium text-primary">
+                  Voir toutes les notifications
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

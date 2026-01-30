@@ -1,8 +1,6 @@
 """Encryption utilities for sensitive data (medical data)."""
 
 import base64
-import os
-from typing import Optional
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
@@ -34,7 +32,7 @@ def _get_fernet() -> Fernet:
     return Fernet(key)
 
 
-def encrypt_data(data: Optional[str]) -> Optional[str]:
+def encrypt_data(data: str | None) -> str | None:
     """Encrypt sensitive data using AES-256 (Fernet)."""
     if data is None or data == "":
         return data
@@ -44,7 +42,7 @@ def encrypt_data(data: Optional[str]) -> Optional[str]:
     return base64.urlsafe_b64encode(encrypted).decode()
 
 
-def decrypt_data(encrypted_data: Optional[str]) -> Optional[str]:
+def decrypt_data(encrypted_data: str | None) -> str | None:
     """Decrypt sensitive data."""
     if encrypted_data is None or encrypted_data == "":
         return encrypted_data
@@ -55,5 +53,5 @@ def decrypt_data(encrypted_data: Optional[str]) -> Optional[str]:
         decrypted = fernet.decrypt(encrypted_bytes)
         return decrypted.decode()
     except Exception:
-        # Return empty string if decryption fails
-        return ""
+        # If decryption fails, the data may be stored as plaintext (e.g. seed data)
+        return encrypted_data

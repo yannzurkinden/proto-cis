@@ -1,38 +1,37 @@
 """Beneficiary management endpoints."""
 
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, and_
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_msp_or_above
-from app.models.user import User
 from app.models.journal import JournalEntry
 from app.models.objective import Objective
+from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
 from app.repositories.pai_repository import PAIRepository
-from app.repositories.objective_repository import ObjectiveRepository
 from app.schemas.beneficiary import (
     BeneficiaryCreate,
-    BeneficiaryUpdate,
-    BeneficiaryResponse,
     BeneficiaryListResponse,
+    BeneficiaryResponse,
     BeneficiaryStats,
+    BeneficiaryUpdate,
+    ContactCreate,
+    ContactResponse,
+    ContactUpdate,
     CurrentPAI,
     MedicalDataResponse,
     MedicalDataUpdate,
-    ContactCreate,
-    ContactUpdate,
-    ContactResponse,
     RiskBehaviorCreate,
-    RiskBehaviorUpdate,
     RiskBehaviorResponse,
+    RiskBehaviorUpdate,
 )
-from app.schemas.common import PaginatedResponse, Message
-from app.utils.encryption import encrypt_data, decrypt_data
+from app.schemas.common import PaginatedResponse
+from app.utils.encryption import decrypt_data, encrypt_data
 
 router = APIRouter()
 
@@ -43,11 +42,11 @@ async def list_beneficiaries(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    status: Optional[str] = None,
-    unit_id: Optional[int] = None,
-    referent_id: Optional[int] = None,
-    search: Optional[str] = None,
-    sort: Optional[str] = None,
+    status: str | None = None,
+    unit_id: int | None = None,
+    referent_id: int | None = None,
+    search: str | None = None,
+    sort: str | None = None,
 ):
     """List all beneficiaries with filtering and pagination."""
     beneficiary_repo = BeneficiaryRepository(db)

@@ -57,10 +57,10 @@ import { adminApi } from '@/api/admin'
 // Schemas
 const userSchema = z.object({
   email: z.string().email('Email invalide'),
-  password: z.string().min(8, 'Minimum 8 caracteres'),
-  first_name: z.string().min(1, 'Prenom requis'),
+  password: z.string().min(8, 'Minimum 8 caractères'),
+  first_name: z.string().min(1, 'Prénom requis'),
   last_name: z.string().min(1, 'Nom requis'),
-  role: z.string().min(1, 'Role requis'),
+  role: z.string().min(1, 'Rôle requis'),
   unit_id: z.string().optional(),
 })
 
@@ -84,7 +84,7 @@ type CategoryForm = z.infer<typeof categorySchema>
 
 const skillSchema = z.object({
   name: z.string().min(1, 'Nom requis'),
-  category: z.string().min(1, 'Categorie requise'),
+  category: z.string().min(1, 'Catégorie requise'),
   description: z.string().optional(),
 })
 
@@ -104,6 +104,7 @@ export function AdminPage() {
 
   const [activeTab, setActiveTab] = useState('users')
   const [userDialogOpen, setUserDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<{ id: number; first_name: string; last_name: string; role: string; unit_id: number | null } | null>(null)
   const [unitDialogOpen, setUnitDialogOpen] = useState(false)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [skillDialogOpen, setSkillDialogOpen] = useState(false)
@@ -118,17 +119,6 @@ export function AdminPage() {
 
   // Check access
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'RUA'
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <Shield className="mb-4 h-16 w-16 text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Acces refuse</h1>
-        <p className="text-muted-foreground">
-          Vous n'avez pas les droits pour acceder a cette page.
-        </p>
-      </div>
-    )
-  }
 
   // Queries
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -185,6 +175,15 @@ export function AdminPage() {
     mutationFn: (userId: number) => adminApi.deactivateUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+  })
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, data }: { userId: number; data: { first_name?: string; last_name?: string; role?: string; unit_id?: number | null } }) =>
+      adminApi.updateUser(userId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+      setEditingUser(null)
     },
   })
 
@@ -269,11 +268,23 @@ export function AdminPage() {
     }
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <Shield className="mb-4 h-16 w-16 text-muted-foreground" />
+        <h1 className="text-2xl font-bold">Accès refusé</h1>
+        <p className="text-muted-foreground">
+          Vous n'avez pas les droits pour accéder à cette page.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Administration</h1>
-        <p className="text-muted-foreground">Gestion du systeme et des parametres</p>
+        <p className="text-muted-foreground">Gestion du système et des paramètres</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -284,15 +295,15 @@ export function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="units">
             <Building className="mr-2 h-4 w-4" />
-            Unites
+            Unités
           </TabsTrigger>
           <TabsTrigger value="categories">
             <Tag className="mr-2 h-4 w-4" />
-            Categories journal
+            Catégories journal
           </TabsTrigger>
           <TabsTrigger value="skills">
             <Star className="mr-2 h-4 w-4" />
-            Referentiel competences
+            Référentiel compétences
           </TabsTrigger>
           <TabsTrigger value="audit">
             <ScrollText className="mr-2 h-4 w-4" />
@@ -321,7 +332,7 @@ export function AdminPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Creer un utilisateur</DialogTitle>
+                  <DialogTitle>Créer un utilisateur</DialogTitle>
                   <DialogDescription>
                     Remplir les informations du nouvel utilisateur.
                   </DialogDescription>
@@ -332,7 +343,7 @@ export function AdminPage() {
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Prenom</Label>
+                      <Label>Prénom</Label>
                       <Input {...userFormHook.register('first_name')} />
                       {userFormHook.formState.errors.first_name && (
                         <p className="text-sm text-destructive">{userFormHook.formState.errors.first_name.message}</p>
@@ -365,7 +376,7 @@ export function AdminPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Role</Label>
+                      <Label>Rôle</Label>
                       <Select
                         value={userFormHook.watch('role')}
                         onValueChange={(v) => userFormHook.setValue('role', v)}
@@ -381,7 +392,7 @@ export function AdminPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Unite</Label>
+                      <Label>Unité</Label>
                       <Select
                         value={userFormHook.watch('unit_id') || ''}
                         onValueChange={(v) => userFormHook.setValue('unit_id', v)}
@@ -402,7 +413,7 @@ export function AdminPage() {
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setUserDialogOpen(false)}>Annuler</Button>
                     <Button type="submit" disabled={createUserMutation.isPending}>
-                      {createUserMutation.isPending ? 'Creation...' : 'Creer'}
+                      {createUserMutation.isPending ? 'Création...' : 'Créer'}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -427,7 +438,7 @@ export function AdminPage() {
                       <TableHead>Role</TableHead>
                       <TableHead>Unite</TableHead>
                       <TableHead>Actif</TableHead>
-                      <TableHead>Derniere connexion</TableHead>
+                      <TableHead>Dernière connexion</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -453,21 +464,37 @@ export function AdminPage() {
                           {u.last_login ? formatDateDisplay(u.last_login) : 'Jamais'}
                         </TableCell>
                         <TableCell>
-                          {u.is_active && u.id !== user?.id && (
+                          <div className="flex items-center gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-destructive"
-                              onClick={() => {
-                                if (window.confirm('Desactiver cet utilisateur ?')) {
-                                  deactivateUserMutation.mutate(u.id)
-                                }
-                              }}
+                              onClick={() => setEditingUser({
+                                id: u.id,
+                                first_name: u.first_name,
+                                last_name: u.last_name,
+                                role: u.role,
+                                unit_id: u.unit_id,
+                              })}
                             >
-                              <UserX className="mr-1 h-3 w-3" />
-                              Desactiver
+                              <Edit className="mr-1 h-3 w-3" />
+                              Modifier
                             </Button>
-                          )}
+                            {u.is_active && u.id !== user?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive"
+                                onClick={() => {
+                                  if (window.confirm('Désactiver cet utilisateur ?')) {
+                                    deactivateUserMutation.mutate(u.id)
+                                  }
+                                }}
+                              >
+                                <UserX className="mr-1 h-3 w-3" />
+                                Désactiver
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -476,12 +503,87 @@ export function AdminPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Edit User Dialog */}
+          <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null) }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Modifier l'utilisateur</DialogTitle>
+                <DialogDescription>
+                  Modifier les informations de l'utilisateur.
+                </DialogDescription>
+              </DialogHeader>
+              {editingUser && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const formData = new FormData(e.currentTarget)
+                    const unitVal = formData.get('edit_unit_id') as string
+                    updateUserMutation.mutate({
+                      userId: editingUser.id,
+                      data: {
+                        first_name: formData.get('edit_first_name') as string,
+                        last_name: formData.get('edit_last_name') as string,
+                        role: formData.get('edit_role') as string,
+                        unit_id: unitVal && unitVal !== 'none' ? Number(unitVal) : null,
+                      },
+                    })
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Prénom</Label>
+                      <Input name="edit_first_name" defaultValue={editingUser.first_name} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Nom</Label>
+                      <Input name="edit_last_name" defaultValue={editingUser.last_name} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Rôle</Label>
+                      <select
+                        name="edit_role"
+                        defaultValue={editingUser.role}
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        {Object.entries(roleLabels).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Unité</Label>
+                      <select
+                        name="edit_unit_id"
+                        defaultValue={editingUser.unit_id ? String(editingUser.unit_id) : 'none'}
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        <option value="none">Aucune</option>
+                        {units?.map((unit) => (
+                          <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>Annuler</Button>
+                    <Button type="submit" disabled={updateUserMutation.isPending}>
+                      {updateUserMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              )}
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* Units tab */}
         <TabsContent value="units" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Unites</h2>
+            <h2 className="text-lg font-semibold">Unités</h2>
             <Dialog open={unitDialogOpen} onOpenChange={(open) => {
               setUnitDialogOpen(open)
               if (!open) { setEditingUnit(null); unitFormHook.reset() }
@@ -489,14 +591,14 @@ export function AdminPage() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle unite
+                  Nouvelle unité
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingUnit ? 'Modifier l\'unite' : 'Nouvelle unite'}</DialogTitle>
+                  <DialogTitle>{editingUnit ? 'Modifier l\'unité' : 'Nouvelle unité'}</DialogTitle>
                   <DialogDescription>
-                    {editingUnit ? 'Modifier les informations de l\'unite.' : 'Creer une nouvelle unite organisationnelle.'}
+                    {editingUnit ? 'Modifier les informations de l\'unite.' : 'Créer une nouvelle unité organisationnelle.'}
                   </DialogDescription>
                 </DialogHeader>
                 <form

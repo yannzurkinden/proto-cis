@@ -1,7 +1,7 @@
 """User model for authentication and authorization."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -29,19 +29,19 @@ class User(Base, TimestampMixin):
         nullable=False,
         default="MSP",
     )  # ADMIN, RUA, RES, MSP, CONSULT
-    unit_id: Mapped[Optional[int]] = mapped_column(
+    unit_id: Mapped[int | None] = mapped_column(
         ForeignKey("units.id"), nullable=True, index=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    password_changed_at: Mapped[Optional[datetime]] = mapped_column(
+    last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    password_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
     # Relationships
     unit: Mapped[Optional["Unit"]] = relationship("Unit", back_populates="users")
-    beneficiaries: Mapped[List["Beneficiary"]] = relationship(
+    beneficiaries: Mapped[list["Beneficiary"]] = relationship(
         "Beneficiary",
         back_populates="referent",
         foreign_keys="Beneficiary.referent_id",

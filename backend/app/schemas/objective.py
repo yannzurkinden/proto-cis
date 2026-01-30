@@ -1,7 +1,7 @@
 """Objective-related schemas."""
 
 from datetime import date, datetime
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -26,7 +26,7 @@ class IndicatorResponse(IndicatorBase):
 
     id: int
     is_achieved: bool
-    achieved_at: Optional[datetime] = None
+    achieved_at: datetime | None = None
 
 
 # Actions
@@ -34,10 +34,10 @@ class ActionBase(BaseModel):
     """Base action schema."""
 
     description: str
-    responsible: Optional[Literal["beneficiary", "msp", "other"]] = None
-    responsible_name: Optional[str] = Field(None, max_length=100)
-    due_date: Optional[date] = None
-    notes: Optional[str] = None
+    responsible: Literal["beneficiary", "msp", "other"] | None = None
+    responsible_name: str | None = Field(None, max_length=100)
+    due_date: date | None = None
+    notes: str | None = None
 
 
 class ActionCreate(ActionBase):
@@ -49,12 +49,12 @@ class ActionCreate(ActionBase):
 class ActionUpdate(BaseModel):
     """Schema for updating an action."""
 
-    description: Optional[str] = None
-    responsible: Optional[Literal["beneficiary", "msp", "other"]] = None
-    responsible_name: Optional[str] = Field(None, max_length=100)
-    due_date: Optional[date] = None
-    status: Optional[Literal["pending", "done"]] = None
-    notes: Optional[str] = None
+    description: str | None = None
+    responsible: Literal["beneficiary", "msp", "other"] | None = None
+    responsible_name: str | None = Field(None, max_length=100)
+    due_date: date | None = None
+    status: Literal["pending", "done"] | None = None
+    notes: str | None = None
 
 
 class ActionResponse(ActionBase):
@@ -71,47 +71,47 @@ class ObjectiveBase(BaseModel):
     """Base objective schema."""
 
     title: str = Field(..., max_length=255)
-    description: Optional[str] = None
+    description: str | None = None
     objective_type: Literal["pai", "behavioral", "operational"]
     term: Literal["short", "medium", "long"]
     priority: Literal["high", "medium", "low"] = "medium"
-    due_date: Optional[date] = None
-    reminder_frequency: Optional[Literal["daily", "weekly", "monthly", "none"]] = None
+    due_date: date | None = None
+    reminder_frequency: Literal["daily", "weekly", "monthly", "none"] | None = None
 
 
 class ObjectiveCreate(ObjectiveBase):
     """Schema for creating an objective."""
 
-    pai_id: Optional[int] = None
+    pai_id: int | None = None
     beneficiary_id: int
-    indicators: Optional[List[IndicatorCreate]] = None
-    actions: Optional[List[ActionCreate]] = None
+    indicators: list[IndicatorCreate] | None = None
+    actions: list[ActionCreate] | None = None
 
 
 class ObjectiveUpdate(BaseModel):
     """Schema for updating an objective."""
 
-    title: Optional[str] = Field(None, max_length=255)
-    description: Optional[str] = None
-    objective_type: Optional[Literal["pai", "behavioral", "operational"]] = None
-    term: Optional[Literal["short", "medium", "long"]] = None
-    priority: Optional[Literal["high", "medium", "low"]] = None
-    due_date: Optional[date] = None
-    reminder_frequency: Optional[Literal["daily", "weekly", "monthly", "none"]] = None
+    title: str | None = Field(None, max_length=255)
+    description: str | None = None
+    objective_type: Literal["pai", "behavioral", "operational"] | None = None
+    term: Literal["short", "medium", "long"] | None = None
+    priority: Literal["high", "medium", "low"] | None = None
+    due_date: date | None = None
+    reminder_frequency: Literal["daily", "weekly", "monthly", "none"] | None = None
 
 
 class ObjectiveProgressUpdate(BaseModel):
     """Schema for updating objective progress."""
 
     progress: int = Field(..., ge=0, le=100)
-    note: Optional[str] = None
+    note: str | None = None
 
 
 class ObjectiveStatusUpdate(BaseModel):
     """Schema for updating objective status."""
 
     status: Literal["pending", "in_progress", "achieved", "abandoned"]
-    note: Optional[str] = None
+    note: str | None = None
 
 
 class ObjectiveResponse(ObjectiveBase):
@@ -120,16 +120,16 @@ class ObjectiveResponse(ObjectiveBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    pai_id: Optional[int] = None
+    pai_id: int | None = None
     beneficiary_id: int
-    beneficiary_name: Optional[str] = None
+    beneficiary_name: str | None = None
     status: str
     progress: int
-    last_reminder_sent: Optional[datetime] = None
-    indicators: Optional[List[IndicatorResponse]] = None
-    actions: Optional[List[ActionResponse]] = None
+    last_reminder_sent: datetime | None = None
+    indicators: list[IndicatorResponse] | None = None
+    actions: list[ActionResponse] | None = None
     created_at: datetime
-    created_by_name: Optional[str] = None
+    created_by_name: str | None = None
 
 
 class ObjectiveOverview(BaseModel):
@@ -139,7 +139,7 @@ class ObjectiveOverview(BaseModel):
     title: str
     status: str
     progress: int
-    due_date: Optional[date] = None
+    due_date: date | None = None
     is_overdue: bool = False
 
 
@@ -148,12 +148,12 @@ class BeneficiaryObjectives(BaseModel):
 
     beneficiary_id: int
     beneficiary_name: str
-    unit_name: Optional[str] = None
-    objectives: List[ObjectiveOverview]
+    unit_name: str | None = None
+    objectives: list[ObjectiveOverview]
 
 
 class ObjectivesOverviewResponse(BaseModel):
     """Schema for objectives overview response."""
 
     summary: dict
-    by_beneficiary: List[BeneficiaryObjectives]
+    by_beneficiary: list[BeneficiaryObjectives]

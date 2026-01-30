@@ -13,10 +13,17 @@ import { formatDate } from '@/lib/utils'
 export function BeneficiaryListPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [showFilters, setShowFilters] = useState(false)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['beneficiaries', { page, search }],
-    queryFn: () => beneficiariesApi.list({ page, size: 20, search: search || undefined }),
+    queryKey: ['beneficiaries', { page, search, status: statusFilter }],
+    queryFn: () => beneficiariesApi.list({
+      page,
+      size: 20,
+      search: search || undefined,
+      status: statusFilter || undefined,
+    }),
   })
 
   const getStatusBadge = (status: string) => {
@@ -36,15 +43,15 @@ export function BeneficiaryListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Beneficiaires</h1>
+          <h1 className="text-3xl font-bold">Bénéficiaires</h1>
           <p className="text-muted-foreground">
-            Gestion des beneficiaires et de leur accompagnement
+            Gestion des bénéficiaires et de leur accompagnement
           </p>
         </div>
         <Button asChild>
           <Link to="/beneficiaries/new">
             <Plus className="mr-2 h-4 w-4" />
-            Nouveau beneficiaire
+            Nouveau bénéficiaire
           </Link>
         </Button>
       </div>
@@ -61,17 +68,43 @@ export function BeneficiaryListPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="h-4 w-4" />
             </Button>
           </div>
+          {showFilters && (
+            <div className="flex items-center gap-4 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Statut:</span>
+                <select
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  value={statusFilter}
+                  onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+                >
+                  <option value="">Tous</option>
+                  <option value="active">Actif</option>
+                  <option value="paused">En pause</option>
+                  <option value="exited">Sorti</option>
+                </select>
+              </div>
+              {statusFilter && (
+                <Button variant="ghost" size="sm" onClick={() => { setStatusFilter(''); setPage(1) }}>
+                  Réinitialiser
+                </Button>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center p-8">Chargement...</div>
           ) : !data?.items.length ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <p className="text-muted-foreground">Aucun beneficiaire trouve</p>
+              <p className="text-muted-foreground">Aucun bénéficiaire trouvé</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -94,9 +127,9 @@ export function BeneficiaryListPage() {
                       {getStatusBadge(beneficiary.status)}
                     </div>
                     <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>Ne le {formatDate(beneficiary.date_of_birth)}</span>
-                      {beneficiary.unit_name && <span>Unite: {beneficiary.unit_name}</span>}
-                      {beneficiary.referent_name && <span>Ref: {beneficiary.referent_name}</span>}
+                      <span>Né le {formatDate(beneficiary.date_of_birth)}</span>
+                      {beneficiary.unit_name && <span>Unité: {beneficiary.unit_name}</span>}
+                      {beneficiary.referent_name && <span>Réf: {beneficiary.referent_name}</span>}
                     </div>
                   </div>
                   <div className="text-right">
@@ -116,7 +149,7 @@ export function BeneficiaryListPage() {
               {data.pages > 1 && (
                 <div className="flex items-center justify-between pt-4">
                   <p className="text-sm text-muted-foreground">
-                    Page {page} sur {data.pages} ({data.total} resultats)
+                    Page {page} sur {data.pages} ({data.total} résultats)
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -125,7 +158,7 @@ export function BeneficiaryListPage() {
                       disabled={page === 1}
                       onClick={() => setPage(page - 1)}
                     >
-                      Precedent
+                      Précédent
                     </Button>
                     <Button
                       variant="outline"

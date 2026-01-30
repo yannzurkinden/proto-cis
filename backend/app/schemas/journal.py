@@ -1,7 +1,7 @@
 """Journal entry schemas."""
 
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,8 +14,8 @@ class JournalCategoryResponse(BaseModel):
     id: int
     name: str
     label: str
-    color: Optional[str] = None
-    icon: Optional[str] = None
+    color: str | None = None
+    icon: str | None = None
 
 
 class JournalEntryBase(BaseModel):
@@ -23,7 +23,7 @@ class JournalEntryBase(BaseModel):
 
     title: str = Field(..., max_length=255)
     content: str
-    entry_date: Optional[datetime] = None
+    entry_date: datetime | None = None
     visibility: Literal["team", "unit", "inter_unit"] = "unit"
 
 
@@ -31,19 +31,19 @@ class JournalEntryCreate(JournalEntryBase):
     """Schema for creating a journal entry."""
 
     beneficiary_id: int
-    category_ids: List[int] = []
-    tags: List[str] = []
+    category_ids: list[int] = []
+    tags: list[str] = []
 
 
 class JournalEntryUpdate(BaseModel):
     """Schema for updating a journal entry."""
 
-    title: Optional[str] = Field(None, max_length=255)
-    content: Optional[str] = None
-    entry_date: Optional[datetime] = None
-    visibility: Optional[Literal["team", "unit", "inter_unit"]] = None
-    category_ids: Optional[List[int]] = None
-    tags: Optional[List[str]] = None
+    title: str | None = Field(None, max_length=255)
+    content: str | None = None
+    entry_date: datetime | None = None
+    visibility: Literal["team", "unit", "inter_unit"] | None = None
+    category_ids: list[int] | None = None
+    tags: list[str] | None = None
 
 
 class JournalEntryResponse(JournalEntryBase):
@@ -53,11 +53,11 @@ class JournalEntryResponse(JournalEntryBase):
 
     id: int
     beneficiary_id: int
-    beneficiary_name: Optional[str] = None
+    beneficiary_name: str | None = None
     author_id: int
-    author_name: Optional[str] = None
-    categories: List[JournalCategoryResponse] = []
-    tags: List[str] = []
+    author_name: str | None = None
+    categories: list[JournalCategoryResponse] = []
+    tags: list[str] = []
     attachments_count: int = 0
     created_at: datetime
     updated_at: datetime

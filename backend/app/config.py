@@ -1,7 +1,6 @@
 """Application configuration using pydantic-settings."""
 
 from functools import lru_cache
-from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -18,6 +17,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "CIS"
     debug: bool = False
+    testing: bool = False
     allowed_origins: str = "http://localhost:3000,http://localhost:5173"
 
     # Database
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     smtp_from: str = ""
 
     @property
-    def allowed_origins_list(self) -> List[str]:
+    def allowed_origins_list(self) -> list[str]:
         """Parse allowed origins from comma-separated string."""
         return [origin.strip() for origin in self.allowed_origins.split(",")]
 

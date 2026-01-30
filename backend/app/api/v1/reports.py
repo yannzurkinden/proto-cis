@@ -2,7 +2,7 @@
 
 import io
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -12,7 +12,9 @@ from app.database import get_db
 from app.dependencies import require_management, require_msp_or_above
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
+from app.repositories.journal_repository import JournalRepository
 from app.repositories.objective_repository import ObjectiveRepository
+from app.repositories.skill_repository import SkillRepository
 from app.repositories.time_tracking_repository import TimeTrackingRepository
 from app.services.pdf import PDFService
 
@@ -42,11 +44,79 @@ async def generate_beneficiary_summary(
             detail="Access denied",
         )
 
-    pdf_service = PDFService()
-    pdf_buffer = await pdf_service.generate_beneficiary_summary(
-        beneficiary=beneficiary,
-        db=db,
+    # Build data dict for PDF generation
+    objective_repo = ObjectiveRepository(db)
+    skill_repo = SkillRepository(db)
+    time_repo = TimeTrackingRepository(db)
+    journal_repo = JournalRepository(db)
+
+    # Get objectives for this beneficiary
+    objectives_list = await objective_repo.get_by_beneficiary(beneficiary_id)
+    objectives_data = [
+        {
+            "titre": obj.title,
+            "statut": obj.status,
+            "progression": obj.progress or 0,
+            "date_echeance": obj.due_date.isoformat() if obj.due_date else "-",
+        }
+        for obj in objectives_list
+    ]
+
+    # Get skill evaluations
+    skills_list = await skill_repo.get_beneficiary_skills(beneficiary_id)
+    skills_data = [
+        {
+            "competence": sk.skill.name if sk.skill else "-",
+            "niveau": sk.level,
+            "date_evaluation": sk.evaluation_date.isoformat() if sk.evaluation_date else "-",
+        }
+        for sk in skills_list
+    ]
+
+    # Get absences
+    absences_list, _ = await time_repo.get_absences(
+        beneficiary_id=beneficiary_id, skip=0, limit=100
     )
+    absences_data = [
+        {
+            "date_debut": ab.start_date.isoformat() if ab.start_date else "-",
+            "date_fin": ab.end_date.isoformat() if ab.end_date else "-",
+            "motif": ab.absence_type,
+            "justifie": ab.justification_document_id is not None,
+        }
+        for ab in absences_list
+    ]
+
+    # Get recent journal entries
+    journal_entries = await journal_repo.get_recent_entries(
+        beneficiary_id=beneficiary_id, limit=10
+    )
+    journal_data = [
+        {
+            "date": entry.entry_date.strftime("%d.%m.%Y") if entry.entry_date else "-",
+            "auteur": entry.author.full_name if entry.author else "-",
+            "contenu": entry.content or "",
+        }
+        for entry in journal_entries
+    ]
+
+    data = {
+        "beneficiary": {
+            "nom": beneficiary.last_name,
+            "prenom": beneficiary.first_name,
+            "date_naissance": beneficiary.date_of_birth.isoformat() if beneficiary.date_of_birth else "-",
+            "numero_ai": beneficiary.ai_number or "-",
+            "unite": beneficiary.unit.name if beneficiary.unit else "-",
+            "msp_referent": beneficiary.referent.full_name if beneficiary.referent else "-",
+        },
+        "objectives": objectives_data,
+        "skills": skills_data,
+        "absences": absences_data,
+        "journal_entries": journal_data,
+    }
+
+    pdf_service = PDFService()
+    pdf_buffer = pdf_service.generate_beneficiary_summary(data)
 
     filename = f"summary_{beneficiary.last_name}_{beneficiary.first_name}.pdf"
 
@@ -63,9 +133,9 @@ async def generate_beneficiary_summary(
 async def generate_activity_report(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
+    unit_id: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
 ):
     """Generate an activity report (management only)."""
     import openpyxl
@@ -102,7 +172,7 @@ async def generate_activity_report(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 
@@ -153,8 +223,8 @@ async def generate_activity_report(
 async def export_objectives(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    status_filter: Optional[str] = Query(None, alias="status"),
+    unit_id: int | None = None,
+    status_filter: str | None = Query(None, alias="status"),
 ):
     """Export objectives as an Excel file (management only)."""
     import openpyxl
@@ -193,7 +263,7 @@ async def export_objectives(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 
@@ -246,8 +316,8 @@ async def export_objectives(
 async def export_absenteeism(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_management)],
-    unit_id: Optional[int] = None,
-    year: Optional[int] = None,
+    unit_id: int | None = None,
+    year: int | None = None,
 ):
     """Export absence statistics as an Excel file (management only)."""
     import openpyxl
@@ -288,7 +358,7 @@ async def export_absenteeism(
     ws.append(headers)
 
     # Style header
-    for col_num, header in enumerate(headers, 1):
+    for col_num, _header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_num)
         cell.font = openpyxl.styles.Font(bold=True)
 

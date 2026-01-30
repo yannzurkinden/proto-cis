@@ -1,13 +1,12 @@
 """Time tracking repository for database operations."""
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
-from typing import List, Optional
 
-from sqlalchemy import select, func, extract
+from sqlalchemy import extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.time_tracking import TimeEntry, Absence, VacationBalance
+from app.models.time_tracking import Absence, TimeEntry, VacationBalance
 from app.repositories.base import BaseRepository
 
 
@@ -22,12 +21,12 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
     async def get_time_entries(
         self,
         beneficiary_id: int,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
-        entry_type: Optional[str] = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        entry_type: str | None = None,
         skip: int = 0,
         limit: int = 50,
-    ) -> tuple[List[TimeEntry], int]:
+    ) -> tuple[list[TimeEntry], int]:
         """Get time entries for a beneficiary with filtering and pagination."""
         query = select(TimeEntry).where(TimeEntry.beneficiary_id == beneficiary_id)
 
@@ -49,7 +48,7 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
 
         return entries, total
 
-    async def get_time_entry_by_id(self, entry_id: int) -> Optional[TimeEntry]:
+    async def get_time_entry_by_id(self, entry_id: int) -> TimeEntry | None:
         """Get a time entry by ID."""
         result = await self.db.execute(
             select(TimeEntry).where(TimeEntry.id == entry_id)
@@ -97,12 +96,12 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
     async def get_absences(
         self,
         beneficiary_id: int,
-        absence_type: Optional[str] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
+        absence_type: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
         skip: int = 0,
         limit: int = 50,
-    ) -> tuple[List[Absence], int]:
+    ) -> tuple[list[Absence], int]:
         """Get absences for a beneficiary with filtering and pagination."""
         query = select(Absence).where(Absence.beneficiary_id == beneficiary_id)
 
@@ -124,7 +123,7 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
 
         return absences, total
 
-    async def get_absence_by_id(self, absence_id: int) -> Optional[Absence]:
+    async def get_absence_by_id(self, absence_id: int) -> Absence | None:
         """Get an absence by ID."""
         result = await self.db.execute(
             select(Absence).where(Absence.id == absence_id)
@@ -156,7 +155,7 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
     async def validate_absence(self, absence: Absence, validated_by: int) -> Absence:
         """Validate an absence."""
         absence.validated_by = validated_by
-        absence.validated_at = datetime.now(timezone.utc)
+        absence.validated_at = datetime.now(UTC)
         await self.db.flush()
         await self.db.refresh(absence)
         return absence
@@ -167,7 +166,7 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
         self,
         beneficiary_id: int,
         year: int,
-    ) -> Optional[VacationBalance]:
+    ) -> VacationBalance | None:
         """Get vacation balance for a beneficiary and year."""
         result = await self.db.execute(
             select(VacationBalance)
@@ -204,7 +203,7 @@ class TimeTrackingRepository(BaseRepository[TimeEntry]):
     async def get_absence_stats(
         self,
         beneficiary_id: int,
-        year: Optional[int] = None,
+        year: int | None = None,
     ) -> dict:
         """Get absence statistics for a beneficiary."""
         query = select(Absence).where(Absence.beneficiary_id == beneficiary_id)

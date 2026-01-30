@@ -69,7 +69,7 @@ function getObjectiveStatusBadge(status: string) {
     case 'pending':
       return <Badge variant="outline">En attente</Badge>
     case 'abandoned':
-      return <Badge variant="secondary">Abandonne</Badge>
+      return <Badge variant="secondary">Abandonné</Badge>
     default:
       return <Badge>{status}</Badge>
   }
@@ -82,7 +82,7 @@ function getObjectiveTypeBadge(type: string) {
     case 'behavioral':
       return <Badge variant="warning">Comportemental</Badge>
     case 'operational':
-      return <Badge variant="secondary">Operationnel</Badge>
+      return <Badge variant="secondary">Opérationnel</Badge>
     default:
       return <Badge>{type}</Badge>
   }
@@ -97,7 +97,7 @@ function getPensionTypeLabel(type: string | null) {
     case 'three_quarter':
       return 'Trois-quarts de rente'
     case 'full':
-      return 'Rente entiere'
+      return 'Rente entière'
     default:
       return type || '-'
   }
@@ -108,11 +108,11 @@ function getContactTypeLabel(type: string) {
     case 'emergency':
       return 'Urgence'
     case 'doctor':
-      return 'Medecin'
+      return 'Médecin'
     case 'psychologist':
       return 'Psychologue'
     case 'ai_referent':
-      return 'Referent AI'
+      return 'Référent AI'
     case 'other':
       return 'Autre'
     default:
@@ -139,11 +139,11 @@ function formatRelativeDate(dateStr: string | null | undefined): string {
 }
 
 const SKILL_LEVELS = [
-  { value: 0, label: 'Non evalue', color: 'bg-gray-200' },
-  { value: 1, label: 'Debutant', color: 'bg-red-300' },
+  { value: 0, label: 'Non évalué', color: 'bg-gray-200' },
+  { value: 1, label: 'Débutant', color: 'bg-red-300' },
   { value: 2, label: 'En acquisition', color: 'bg-orange-300' },
   { value: 3, label: 'Acquis', color: 'bg-yellow-300' },
-  { value: 4, label: 'Maitrise', color: 'bg-green-400' },
+  { value: 4, label: 'Maîtrisé', color: 'bg-green-400' },
 ]
 
 // ---- Tab Components ----
@@ -165,7 +165,7 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>Ne(e) le {formatDateFr(beneficiary.date_of_birth)}</span>
+            <span>Né(e) le {formatDateFr(beneficiary.date_of_birth)}</span>
           </div>
           {beneficiary.phone && (
             <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
           )}
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Langue:</span>
-            <span>{beneficiary.language || 'Francais'}</span>
+            <span>{({'fr': 'Français', 'de': 'Allemand', 'it': 'Italien', 'en': 'Anglais', 'pt': 'Portugais', 'es': 'Espagnol', 'tr': 'Turc', 'sq': 'Albanais', 'sr': 'Serbe', 'ar': 'Arabe'}[beneficiary.language ?? ''] || beneficiary.language || 'Français')}</span>
           </div>
         </CardContent>
       </Card>
@@ -204,7 +204,7 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
         <CardContent className="space-y-3">
           {beneficiary.ai_number && (
             <div>
-              <span className="text-sm text-muted-foreground">Numero AI:</span>{' '}
+              <span className="text-sm text-muted-foreground">Numéro AI:</span>{' '}
               <span className="font-medium">{beneficiary.ai_number}</span>
             </div>
           )}
@@ -219,7 +219,7 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
             </div>
           )}
           <div>
-            <span className="text-sm text-muted-foreground">Date d'entree:</span>{' '}
+            <span className="text-sm text-muted-foreground">Date d'entrée:</span>{' '}
             <span>{formatDateFr(beneficiary.entry_date)}</span>
           </div>
           {beneficiary.exit_date && (
@@ -248,11 +248,11 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
             <span>{beneficiary.occupation_rate ? `${beneficiary.occupation_rate}%` : '-'}</span>
           </div>
           <div>
-            <span className="text-sm text-muted-foreground">Unite:</span>{' '}
+            <span className="text-sm text-muted-foreground">Unité:</span>{' '}
             <span>{beneficiary.unit_name || '-'}</span>
           </div>
           <div>
-            <span className="text-sm text-muted-foreground">MSP referent:</span>{' '}
+            <span className="text-sm text-muted-foreground">MSP référent:</span>{' '}
             <span>{beneficiary.referent_name || '-'}</span>
           </div>
         </CardContent>
@@ -267,7 +267,11 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
           {beneficiary.current_pai ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                {getStatusBadge(beneficiary.current_pai.status)}
+                {beneficiary.current_pai.valid_to && new Date(beneficiary.current_pai.valid_to) < new Date() ? (
+                  <Badge variant="destructive">Expiré</Badge>
+                ) : (
+                  getStatusBadge(beneficiary.current_pai.status)
+                )}
                 <span className="text-sm text-muted-foreground">
                   Du {formatDateFr(beneficiary.current_pai.valid_from)}
                   {beneficiary.current_pai.valid_to && (
@@ -275,6 +279,9 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
                   )}
                 </span>
               </div>
+              {beneficiary.current_pai.valid_to && new Date(beneficiary.current_pai.valid_to) < new Date() && (
+                <p className="text-sm text-destructive">Ce PAI a expiré. Veuillez en créer un nouveau.</p>
+              )}
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/beneficiaries/${beneficiary.id}/pais/${beneficiary.current_pai.id}`}>
                   Voir le PAI
@@ -287,7 +294,7 @@ function ProfilTab({ beneficiary }: { beneficiary: Beneficiary }) {
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/beneficiaries/${beneficiary.id}/pais/new`}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Creer un PAI
+                  Créer un PAI
                 </Link>
               </Button>
             </div>
@@ -349,9 +356,9 @@ function MedicalTab({ beneficiaryId }: { beneficiaryId: number }) {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Lock className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-lg font-medium">Acces restreint</p>
+          <p className="text-lg font-medium">Accès restreint</p>
           <p className="text-muted-foreground">
-            Vous n'avez pas les droits pour consulter les donnees medicales.
+            Vous n'avez pas les droits pour consulter les données médicales.
           </p>
         </CardContent>
       </Card>
@@ -362,7 +369,7 @@ function MedicalTab({ beneficiaryId }: { beneficiaryId: number }) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin" />
-        <span className="ml-2">Chargement des donnees medicales...</span>
+        <span className="ml-2">Chargement des données médicales...</span>
       </div>
     )
   }
@@ -373,13 +380,13 @@ function MedicalTab({ beneficiaryId }: { beneficiaryId: number }) {
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Lock className="h-4 w-4" />
-        <span>Donnees medicales confidentielles - Acces restreint</span>
+        <span>Données médicales confidentielles - Accès restreint</span>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Medicaments</CardTitle>
+            <CardTitle className="text-lg">Médicaments</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap">{data.medication || 'Aucune information'}</p>
@@ -406,7 +413,7 @@ function MedicalTab({ beneficiaryId }: { beneficiaryId: number }) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Notes medicales</CardTitle>
+            <CardTitle className="text-lg">Notes médicales</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap">{data.medical_notes || 'Aucune note'}</p>
@@ -615,9 +622,9 @@ function ContactsTab({ beneficiary }: { beneficiary: Beneficiary }) {
                   }
                 >
                   <option value="emergency">Urgence</option>
-                  <option value="doctor">Medecin</option>
+                  <option value="doctor">Médecin</option>
                   <option value="psychologist">Psychologue</option>
-                  <option value="ai_referent">Referent AI</option>
+                  <option value="ai_referent">Référent AI</option>
                   <option value="other">Autre</option>
                 </select>
               </div>
@@ -848,7 +855,7 @@ function ObjectivesTab({ beneficiaryId }: { beneficiaryId: number }) {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-8">
           <Target className="h-10 w-10 text-muted-foreground mb-2" />
-          <p className="text-muted-foreground">Aucun objectif defini</p>
+          <p className="text-muted-foreground">Aucun objectif défini</p>
         </CardContent>
       </Card>
     )
@@ -856,19 +863,22 @@ function ObjectivesTab({ beneficiaryId }: { beneficiaryId: number }) {
 
   return (
     <div className="space-y-3">
-      {objectives.map((obj) => (
+      {objectives.map((obj) => {
+        const isOverdue = obj.due_date && new Date(obj.due_date) < new Date() && obj.status !== 'achieved' && obj.status !== 'abandoned'
+        return (
         <Link key={obj.id} to={`/objectives/${obj.id}`}>
-          <Card className="transition-colors hover:bg-accent">
+          <Card className={`transition-colors hover:bg-accent ${isOverdue ? 'border-destructive border-2' : ''}`}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{obj.title}</span>
                   {getObjectiveTypeBadge(obj.objective_type)}
                   {getObjectiveStatusBadge(obj.status)}
+                  {isOverdue && <Badge variant="destructive">En retard</Badge>}
                 </div>
                 {obj.due_date && (
-                  <span className="text-sm text-muted-foreground">
-                    Echeance: {formatDateFr(obj.due_date)}
+                  <span className={`text-sm ${isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                    Échéance: {formatDateFr(obj.due_date)}
                   </span>
                 )}
               </div>
@@ -884,7 +894,8 @@ function ObjectivesTab({ beneficiaryId }: { beneficiaryId: number }) {
             </CardContent>
           </Card>
         </Link>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -921,7 +932,7 @@ function JournalTab({ beneficiaryId }: { beneficiaryId: number }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Label>Categorie:</Label>
+          <Label>Catégorie:</Label>
           <select
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
             value={categoryFilter}
@@ -944,7 +955,7 @@ function JournalTab({ beneficiaryId }: { beneficiaryId: number }) {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
             <BookOpen className="h-10 w-10 text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">Aucune entree de journal</p>
+            <p className="text-muted-foreground">Aucune entrée de journal</p>
           </CardContent>
         </Card>
       ) : (
@@ -1415,7 +1426,7 @@ function DocumentsTab({ beneficiaryId }: { beneficiaryId: number }) {
 
 const TABS = [
   { id: 'profil', label: 'Profil', icon: User },
-  { id: 'medical', label: 'Donnees medicales', icon: Heart },
+  { id: 'medical', label: 'Données médicales', icon: Heart },
   { id: 'contacts', label: 'Reseau / Contacts', icon: Users },
   { id: 'risques', label: 'Comportements a risque', icon: AlertTriangle },
   { id: 'objectifs', label: 'Objectifs', icon: Target },

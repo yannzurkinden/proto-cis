@@ -1,6 +1,6 @@
 """Unit management endpoints."""
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +9,8 @@ from app.database import get_db
 from app.dependencies import get_current_user, require_admin
 from app.models.user import User
 from app.repositories.unit_repository import UnitRepository
-from app.schemas.unit import UnitCreate, UnitUpdate, UnitResponse
 from app.schemas.common import PaginatedResponse
+from app.schemas.unit import UnitCreate, UnitResponse, UnitUpdate
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ async def list_units(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(100, ge=1, le=100),
-    is_active: Optional[bool] = None,
+    is_active: bool | None = None,
 ):
     """List all units with filtering and pagination."""
     unit_repo = UnitRepository(db)

@@ -1,7 +1,6 @@
 """Dashboard schemas."""
 
-from datetime import date, datetime
-from typing import List, Optional
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -11,10 +10,10 @@ class BeneficiarySummary(BaseModel):
 
     id: int
     name: str
-    photo_url: Optional[str] = None
+    photo_url: str | None = None
     status: str
     objectives_overdue: int = 0
-    last_journal_entry: Optional[date] = None
+    last_journal_entry: date | None = None
 
 
 class ReminderItem(BaseModel):
@@ -23,19 +22,19 @@ class ReminderItem(BaseModel):
     type: str
     beneficiary_id: int
     beneficiary_name: str
-    objective_id: Optional[int] = None
-    objective_title: Optional[str] = None
-    due_date: Optional[date] = None
-    message: Optional[str] = None
+    objective_id: int | None = None
+    objective_title: str | None = None
+    due_date: date | None = None
+    message: str | None = None
 
 
 class MSPDashboardResponse(BaseModel):
     """Schema for MSP dashboard response."""
 
-    my_beneficiaries: List[BeneficiarySummary]
-    today_reminders: List[ReminderItem]
-    recent_journal_entries: List[dict]
-    pending_tasks: List[dict]
+    my_beneficiaries: list[BeneficiarySummary]
+    today_reminders: list[ReminderItem]
+    recent_journal_entries: list[dict]
+    pending_tasks: list[dict]
 
 
 class UnitStats(BaseModel):
@@ -59,7 +58,7 @@ class AbsenceStatsSummary(BaseModel):
     """Summary of absence statistics."""
 
     global_rate: float
-    by_unit: List[UnitStats]
+    by_unit: list[UnitStats]
 
 
 class BeneficiarySummaryStats(BaseModel):
@@ -86,4 +85,4 @@ class ManagementDashboardResponse(BaseModel):
     summary: BeneficiarySummaryStats
     objectives_overview: ObjectivesOverviewSummary
     absence_stats: AbsenceStatsSummary
-    alerts: List[Alert]
+    alerts: list[Alert]

@@ -2,9 +2,9 @@
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -12,8 +12,6 @@ from app.models.base import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.beneficiary import Beneficiary
-    from app.models.document import Document
-    from app.models.user import User
 
 
 class Skill(Base):
@@ -23,8 +21,8 @@ class Skill(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    category: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    category: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
@@ -44,8 +42,8 @@ class BeneficiarySkill(Base, TimestampMixin):
         String(20), nullable=False
     )  # not_acquired, in_progress, acquired, mastered
     evaluation_date: Mapped[date] = mapped_column(Date, nullable=False)
-    evaluated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
-    comments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    evaluated_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    comments: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     beneficiary: Mapped["Beneficiary"] = relationship("Beneficiary", back_populates="skills")
@@ -64,15 +62,15 @@ class Training(Base):
 
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     training_date: Mapped[date] = mapped_column(Date, nullable=False)
-    duration_hours: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2), nullable=True)
-    trainer: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    certificate_document_id: Mapped[Optional[int]] = mapped_column(
+    duration_hours: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    trainer: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    certificate_document_id: Mapped[int | None] = mapped_column(
         ForeignKey("documents.id"), nullable=True
     )
-    comments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    comments: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default="now()", nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     # Relationships

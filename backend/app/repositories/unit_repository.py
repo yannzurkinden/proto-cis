@@ -1,8 +1,7 @@
 """Unit repository for database operations."""
 
-from typing import List, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.unit import Unit
@@ -15,14 +14,14 @@ class UnitRepository(BaseRepository[Unit]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Unit)
 
-    async def get_by_name(self, name: str) -> Optional[Unit]:
+    async def get_by_name(self, name: str) -> Unit | None:
         """Get unit by name."""
         result = await self.db.execute(
             select(Unit).where(Unit.name == name)
         )
         return result.scalar_one_or_none()
 
-    async def get_all_active(self) -> List[Unit]:
+    async def get_all_active(self) -> list[Unit]:
         """Get all active units."""
         result = await self.db.execute(
             select(Unit)
@@ -35,8 +34,8 @@ class UnitRepository(BaseRepository[Unit]):
         self,
         skip: int = 0,
         limit: int = 100,
-        is_active: Optional[bool] = None,
-    ) -> tuple[List[Unit], int]:
+        is_active: bool | None = None,
+    ) -> tuple[list[Unit], int]:
         """Get all units with filtering and pagination."""
         query = select(Unit)
 

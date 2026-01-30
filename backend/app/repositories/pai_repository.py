@@ -1,13 +1,11 @@
 """PAI repository for database operations."""
 
-from typing import List, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.pai import PAI
-from app.models.objective import Objective
 from app.repositories.base import BaseRepository
 
 
@@ -17,7 +15,7 @@ class PAIRepository(BaseRepository[PAI]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, PAI)
 
-    async def get_by_id_with_objectives(self, id: int) -> Optional[PAI]:
+    async def get_by_id_with_objectives(self, id: int) -> PAI | None:
         """Get PAI by ID with objectives loaded."""
         result = await self.db.execute(
             select(PAI)
@@ -29,8 +27,8 @@ class PAIRepository(BaseRepository[PAI]):
     async def get_by_beneficiary(
         self,
         beneficiary_id: int,
-        status: Optional[str] = None,
-    ) -> List[PAI]:
+        status: str | None = None,
+    ) -> list[PAI]:
         """Get all PAIs for a beneficiary."""
         query = (
             select(PAI)
@@ -45,7 +43,7 @@ class PAIRepository(BaseRepository[PAI]):
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_active_pai(self, beneficiary_id: int) -> Optional[PAI]:
+    async def get_active_pai(self, beneficiary_id: int) -> PAI | None:
         """Get the active PAI for a beneficiary."""
         result = await self.db.execute(
             select(PAI)

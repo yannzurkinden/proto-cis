@@ -1,14 +1,12 @@
 """User repository for database operations."""
 
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.user import User
-from app.models.unit import Unit
 from app.repositories.base import BaseRepository
 
 
@@ -18,14 +16,14 @@ class UserRepository(BaseRepository[User]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, User)
 
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_by_email(self, email: str) -> User | None:
         """Get user by email."""
         result = await self.db.execute(
             select(User).where(User.email == email)
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_unit(self, id: int) -> Optional[User]:
+    async def get_by_id_with_unit(self, id: int) -> User | None:
         """Get user by ID with unit relationship loaded."""
         result = await self.db.execute(
             select(User)
@@ -38,10 +36,10 @@ class UserRepository(BaseRepository[User]):
         self,
         skip: int = 0,
         limit: int = 20,
-        role: Optional[str] = None,
-        unit_id: Optional[int] = None,
-        is_active: Optional[bool] = None,
-    ) -> tuple[List[User], int]:
+        role: str | None = None,
+        unit_id: int | None = None,
+        is_active: bool | None = None,
+    ) -> tuple[list[User], int]:
         """Get all users with filtering and pagination."""
         query = select(User).options(selectinload(User.unit))
 
@@ -65,13 +63,13 @@ class UserRepository(BaseRepository[User]):
 
     async def update_last_login(self, user: User) -> User:
         """Update user's last login timestamp."""
-        user.last_login = datetime.now(timezone.utc)
+        user.last_login = datetime.now(UTC)
         await self.db.flush()
         return user
 
     async def update_password(self, user: User, hashed_password: str) -> User:
         """Update user's password."""
         user.hashed_password = hashed_password
-        user.password_changed_at = datetime.now(timezone.utc)
+        user.password_changed_at = datetime.now(UTC)
         await self.db.flush()
         return user

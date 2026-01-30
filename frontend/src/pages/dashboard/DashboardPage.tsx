@@ -34,13 +34,13 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Tableau de bord</h1>
-          <p className="text-muted-foreground">Vue d'ensemble de l'activite</p>
+          <p className="text-muted-foreground">Vue d'ensemble de l'activité</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Beneficiaires actifs</CardTitle>
+              <CardTitle className="text-sm font-medium">Bénéficiaires actifs</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -66,7 +66,7 @@ export function DashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Taux de reussite</CardTitle>
+              <CardTitle className="text-sm font-medium">Taux de réussite</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -84,7 +84,7 @@ export function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{managementData.alerts.length}</div>
-              <p className="text-xs text-muted-foreground">a traiter</p>
+              <p className="text-xs text-muted-foreground">à traiter</p>
             </CardContent>
           </Card>
         </div>
@@ -92,8 +92,8 @@ export function DashboardPage() {
         {managementData.alerts.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Alertes recentes</CardTitle>
-              <CardDescription>Actions necessitant votre attention</CardDescription>
+              <CardTitle>Alertes récentes</CardTitle>
+              <CardDescription>Actions nécessitant votre attention</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -122,14 +122,14 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Bonjour, {user?.first_name}</h1>
-          <p className="text-muted-foreground">Voici votre activite du jour</p>
+          <p className="text-muted-foreground">Voici votre activité du jour</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Mes beneficiaires</CardTitle>
-              <CardDescription>{mspData.my_beneficiaries.length} beneficiaires suivis</CardDescription>
+              <CardTitle>Mes bénéficiaires</CardTitle>
+              <CardDescription>{mspData.my_beneficiaries.length} bénéficiaires suivis</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -168,7 +168,7 @@ export function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Rappels du jour</CardTitle>
-              <CardDescription>Actions a effectuer</CardDescription>
+              <CardDescription>Actions à effectuer</CardDescription>
             </CardHeader>
             <CardContent>
               {mspData.today_reminders.length === 0 ? (
@@ -185,7 +185,7 @@ export function DashboardPage() {
                         </p>
                         {reminder.due_date && (
                           <p className="text-xs text-destructive">
-                            Echeance: {formatDate(reminder.due_date)}
+                            Échéance: {formatDate(reminder.due_date)}
                           </p>
                         )}
                       </div>
@@ -199,12 +199,12 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Journal recent</CardTitle>
-            <CardDescription>Dernieres entrees du journal</CardDescription>
+            <CardTitle>Journal récent</CardTitle>
+            <CardDescription>Dernières entrées du journal</CardDescription>
           </CardHeader>
           <CardContent>
             {mspData.recent_journal_entries.length === 0 ? (
-              <p className="text-muted-foreground">Aucune entree recente</p>
+              <p className="text-muted-foreground">Aucune entrée récente</p>
             ) : (
               <div className="space-y-4">
                 {mspData.recent_journal_entries.map((entry) => (

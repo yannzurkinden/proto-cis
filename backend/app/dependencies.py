@@ -1,6 +1,6 @@
 """FastAPI dependencies for authentication and authorization."""
 
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -67,7 +67,7 @@ async def get_current_active_user(
     return current_user
 
 
-def require_roles(allowed_roles: List[str]):
+def require_roles(allowed_roles: list[str]):
     """Dependency factory to require specific roles."""
 
     async def role_checker(
@@ -90,9 +90,9 @@ require_msp_or_above = require_roles(["ADMIN", "RUA", "RES", "MSP"])
 
 
 async def get_optional_current_user(
-    credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> Optional[User]:
+) -> User | None:
     """Optionally get the current user if authenticated."""
     if credentials is None:
         return None

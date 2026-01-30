@@ -1,32 +1,29 @@
 """Admin endpoints for user management, units, skills, journal categories, and audit logs."""
 
 from datetime import date, datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, or_
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.dependencies import require_admin, require_management
-from app.models.user import User
-from app.models.unit import Unit
 from app.models.beneficiary import Beneficiary
-from app.models.skill import Skill
+from app.models.user import User
 from app.repositories.journal_repository import JournalRepository
 from app.repositories.notification_repository import AuditLogRepository
-from app.repositories.user_repository import UserRepository
-from app.repositories.unit_repository import UnitRepository
 from app.repositories.skill_repository import SkillRepository
+from app.repositories.unit_repository import UnitRepository
+from app.repositories.user_repository import UserRepository
 from app.schemas.common import PaginatedResponse
 from app.schemas.journal import JournalCategoryResponse
-from app.schemas.user import UserCreate, UserUpdate, UserResponse
-from app.schemas.unit import UnitCreate, UnitUpdate, UnitResponse
-from app.schemas.skill import SkillCreate, SkillUpdate, SkillResponse
+from app.schemas.skill import SkillCreate, SkillResponse, SkillUpdate
+from app.schemas.unit import UnitCreate, UnitResponse, UnitUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.utils.security import get_password_hash, validate_password_strength
-
-from pydantic import BaseModel, ConfigDict, Field
 
 router = APIRouter()
 
@@ -39,19 +36,19 @@ class JournalCategoryCreate(BaseModel):
 
     name: str = Field(..., max_length=50)
     label: str = Field(..., max_length=100)
-    color: Optional[str] = Field(None, max_length=7)
-    icon: Optional[str] = Field(None, max_length=50)
+    color: str | None = Field(None, max_length=7)
+    icon: str | None = Field(None, max_length=50)
 
 
 class JournalCategoryUpdate(BaseModel):
     """Schema for updating a journal category."""
 
-    name: Optional[str] = Field(None, max_length=50)
-    label: Optional[str] = Field(None, max_length=100)
-    color: Optional[str] = Field(None, max_length=7)
-    icon: Optional[str] = Field(None, max_length=50)
-    is_active: Optional[bool] = None
-    sort_order: Optional[int] = None
+    name: str | None = Field(None, max_length=50)
+    label: str | None = Field(None, max_length=100)
+    color: str | None = Field(None, max_length=7)
+    icon: str | None = Field(None, max_length=50)
+    is_active: bool | None = None
+    sort_order: int | None = None
 
 
 class AuditLogResponse(BaseModel):
@@ -60,14 +57,14 @@ class AuditLogResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    user_id: Optional[int] = None
+    user_id: int | None = None
     action: str
     resource_type: str
-    resource_id: Optional[int] = None
-    old_values: Optional[dict] = None
-    new_values: Optional[dict] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    resource_id: int | None = None
+    old_values: dict | None = None
+    new_values: dict | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     created_at: datetime
 
 
@@ -87,10 +84,10 @@ async def list_users(
     current_user: Annotated[User, Depends(require_management)],
     page: int = Query(1, ge=1),
     size: int = Query(50, ge=1, le=100),
-    role: Optional[str] = None,
-    unit_id: Optional[int] = None,
-    is_active: Optional[bool] = None,
-    search: Optional[str] = None,
+    role: str | None = None,
+    unit_id: int | None = None,
+    is_active: bool | None = None,
+    search: str | None = None,
 ):
     """List all users with filtering, search, and pagination."""
     query = select(User).options(selectinload(User.unit))
@@ -488,11 +485,11 @@ async def list_audit_logs(
     current_user: Annotated[User, Depends(require_admin)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    user_id: Optional[int] = None,
-    action: Optional[str] = None,
-    resource_type: Optional[str] = None,
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
+    user_id: int | None = None,
+    action: str | None = None,
+    resource_type: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
 ):
     """List audit logs with filtering (admin only)."""
     audit_repo = AuditLogRepository(db)

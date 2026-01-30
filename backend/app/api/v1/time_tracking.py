@@ -1,7 +1,7 @@
 """Time tracking endpoints for time entries, absences, and vacation balance."""
 
-from datetime import date, datetime
-from typing import Annotated, Optional
+from datetime import date
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +11,7 @@ from app.dependencies import get_current_user, require_management, require_msp_o
 from app.models.user import User
 from app.repositories.beneficiary_repository import BeneficiaryRepository
 from app.repositories.time_tracking_repository import TimeTrackingRepository
+from app.schemas.common import PaginatedResponse
 from app.schemas.time_tracking import (
     AbsenceCreate,
     AbsenceResponse,
@@ -21,7 +22,6 @@ from app.schemas.time_tracking import (
     TimeEntryUpdate,
     VacationBalanceResponse,
 )
-from app.schemas.common import PaginatedResponse
 
 router = APIRouter()
 
@@ -39,8 +39,8 @@ async def list_time_entries(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
 ):
     """List time entries for a beneficiary, filterable by date range."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -165,9 +165,9 @@ async def list_absences(
     current_user: Annotated[User, Depends(get_current_user)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    absence_type: Optional[str] = None,
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
+    absence_type: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
 ):
     """List absences for a beneficiary, filterable by type and date range."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -318,7 +318,7 @@ async def get_vacation_balance(
     beneficiary_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    year: Optional[int] = None,
+    year: int | None = None,
 ):
     """Get vacation balance for a beneficiary."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -358,7 +358,7 @@ async def get_absence_stats(
     beneficiary_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    year: Optional[int] = None,
+    year: int | None = None,
 ):
     """Get absence statistics for a beneficiary."""
     beneficiary_repo = BeneficiaryRepository(db)
@@ -384,7 +384,7 @@ async def get_absence_stats(
 # --- Monthly Summary ---
 
 
-from pydantic import BaseModel
+from pydantic import BaseModel  # noqa: E402
 
 
 class MonthlySummaryResponse(BaseModel):
@@ -434,7 +434,7 @@ async def get_monthly_summary(
     )
 
     total_hours = sum(float(e.hours_worked or 0) for e in entries)
-    present_days = len(set(e.entry_date for e in entries))
+    present_days = len({e.entry_date for e in entries})
 
     # Working days estimate
     working_days = sum(

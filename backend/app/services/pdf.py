@@ -3,7 +3,7 @@
 import logging
 from datetime import date, datetime
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -103,7 +103,7 @@ class PDFService:
             bottomMargin=2.5 * cm,
         )
 
-        story: List[Any] = []
+        story: list[Any] = []
         ben = data.get("beneficiary", {})
         full_name = f"{ben.get('prenom', '')} {ben.get('nom', '')}".strip()
         title = f"Fiche de synthese - {full_name}" if full_name else "Fiche de synthese"
@@ -217,7 +217,7 @@ class PDFService:
             bottomMargin=2.5 * cm,
         )
 
-        story: List[Any] = []
+        story: list[Any] = []
         report_title = data.get("title", "Rapport d'activite")
         self._build_header(story, report_title)
 
@@ -335,7 +335,7 @@ class PDFService:
         canvas.restoreState()
 
     def _make_key_value_table(
-        self, rows: List[List[str]]
+        self, rows: list[list[str]]
     ) -> Table:
         """Build a two-column key/value table with CIS styling.
 
@@ -365,8 +365,8 @@ class PDFService:
 
     def _make_data_table(
         self,
-        rows: List[list],
-        col_widths: Optional[list] = None,
+        rows: list[list],
+        col_widths: list | None = None,
     ) -> Table:
         """Build a data table with a styled header row.
 

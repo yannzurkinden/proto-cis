@@ -2,9 +2,9 @@
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, Time
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -12,8 +12,6 @@ from app.models.base import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.beneficiary import Beneficiary
-    from app.models.document import Document
-    from app.models.user import User
 
 
 class TimeEntry(Base, TimestampMixin):
@@ -27,18 +25,18 @@ class TimeEntry(Base, TimestampMixin):
     )
 
     entry_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    time_in: Mapped[Optional[time]] = mapped_column(Time, nullable=True)
-    time_out: Mapped[Optional[time]] = mapped_column(Time, nullable=True)
+    time_in: Mapped[time | None] = mapped_column(Time, nullable=True)
+    time_out: Mapped[time | None] = mapped_column(Time, nullable=True)
     entry_type: Mapped[str] = mapped_column(
         String(20), default="work", nullable=False
     )  # work, training, appointment
-    hours_worked: Mapped[Optional[Decimal]] = mapped_column(Numeric(4, 2), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    hours_worked: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     beneficiary: Mapped["Beneficiary"] = relationship("Beneficiary", back_populates="time_entries")
 
-    def calculate_hours(self) -> Optional[Decimal]:
+    def calculate_hours(self) -> Decimal | None:
         """Calculate hours worked from time_in and time_out."""
         if self.time_in and self.time_out:
             time_in_dt = datetime.combine(date.today(), self.time_in)
@@ -63,12 +61,12 @@ class Absence(Base, TimestampMixin):
     )  # sick, vacation, accident, unauthorized, other
     start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
-    justification_document_id: Mapped[Optional[int]] = mapped_column(
+    justification_document_id: Mapped[int | None] = mapped_column(
         ForeignKey("documents.id"), nullable=True
     )
-    validated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
-    validated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    validated_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     beneficiary: Mapped["Beneficiary"] = relationship("Beneficiary", back_populates="absences")
@@ -94,7 +92,7 @@ class VacationBalance(Base):
     taken_days: Mapped[Decimal] = mapped_column(Numeric(5, 2), default=0, nullable=False)
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default="now()", onupdate="now()", nullable=False
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
     # Relationships

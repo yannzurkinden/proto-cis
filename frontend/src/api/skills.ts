@@ -61,21 +61,53 @@ export const skillsApi = {
 
   // Skill evaluations
   getEvaluations: async (beneficiaryId: number): Promise<SkillEvaluation[]> => {
-    const response = await apiClient.get<SkillEvaluation[]>(
+    interface BackendSkillEval {
+      id: number
+      skill_id: number
+      skill_name: string | null
+      level: string
+      evaluation_date: string
+      evaluated_by: number
+      comments: string | null
+    }
+    const response = await apiClient.get<BackendSkillEval[]>(
       `/skills/beneficiaries/${beneficiaryId}/skills`
     )
-    return response.data
+    return response.data.map((ev) => ({
+      id: ev.id,
+      beneficiary_id: beneficiaryId,
+      skill_id: ev.skill_id,
+      skill_name: ev.skill_name || '',
+      skill_category: '',
+      level: ev.level as SkillEvaluation['level'],
+      evaluated_at: ev.evaluation_date,
+      evaluated_by: ev.evaluated_by,
+      evaluated_by_name: null,
+      notes: ev.comments,
+    }))
   },
 
   createEvaluation: async (
     beneficiaryId: number,
     data: { skill_id: number; level: string; notes?: string }
   ): Promise<SkillEvaluation> => {
-    const response = await apiClient.put<SkillEvaluation>(
+    const response = await apiClient.put<{ id: number; skill_id: number; skill_name: string | null; level: string; evaluation_date: string; evaluated_by: number; comments: string | null }>(
       `/skills/beneficiaries/${beneficiaryId}/skills/${data.skill_id}`,
       { level: data.level, comments: data.notes }
     )
-    return response.data
+    const ev = response.data
+    return {
+      id: ev.id,
+      beneficiary_id: beneficiaryId,
+      skill_id: ev.skill_id,
+      skill_name: ev.skill_name || '',
+      skill_category: '',
+      level: ev.level as SkillEvaluation['level'],
+      evaluated_at: ev.evaluation_date,
+      evaluated_by: ev.evaluated_by,
+      evaluated_by_name: null,
+      notes: ev.comments,
+    }
   },
 
   // Trainings
@@ -87,9 +119,19 @@ export const skillsApi = {
   },
 
   createTraining: async (beneficiaryId: number, data: Partial<Training>): Promise<Training> => {
+    const payload = {
+      title: data.title,
+      training_date: data.start_date,
+      end_date: data.end_date,
+      duration_hours: data.duration_hours,
+      trainer: data.trainer,
+      location: data.location,
+      certificate_obtained: data.certificate,
+      notes: data.notes,
+    }
     const response = await apiClient.post<Training>(
       `/skills/beneficiaries/${beneficiaryId}/trainings`,
-      data
+      payload
     )
     return response.data
   },

@@ -1,8 +1,7 @@
 """Document repository for database operations."""
 
-from typing import List, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document
@@ -19,10 +18,10 @@ class DocumentRepository(BaseRepository[Document]):
         self,
         skip: int = 0,
         limit: int = 20,
-        beneficiary_id: Optional[int] = None,
-        document_type: Optional[str] = None,
-        confidentiality: Optional[str] = None,
-    ) -> tuple[List[Document], int]:
+        beneficiary_id: int | None = None,
+        document_type: str | None = None,
+        confidentiality: str | None = None,
+    ) -> tuple[list[Document], int]:
         """Get all documents with filtering and pagination."""
         query = select(Document).where(Document.is_current == True)
 
@@ -44,7 +43,7 @@ class DocumentRepository(BaseRepository[Document]):
 
         return documents, total
 
-    async def get_by_beneficiary(self, beneficiary_id: int) -> List[Document]:
+    async def get_by_beneficiary(self, beneficiary_id: int) -> list[Document]:
         """Get all documents for a beneficiary."""
         result = await self.db.execute(
             select(Document)

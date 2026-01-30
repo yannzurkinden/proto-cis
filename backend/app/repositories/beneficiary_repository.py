@@ -1,14 +1,11 @@
 """Beneficiary repository for database operations."""
 
-from typing import List, Optional
 
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.beneficiary import Beneficiary, BeneficiaryMedicalData, Contact, RiskBehavior
-from app.models.unit import Unit
-from app.models.user import User
 from app.repositories.base import BaseRepository
 
 
@@ -18,7 +15,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Beneficiary)
 
-    async def get_by_id_with_relations(self, id: int) -> Optional[Beneficiary]:
+    async def get_by_id_with_relations(self, id: int) -> Beneficiary | None:
         """Get beneficiary by ID with all relations loaded."""
         result = await self.db.execute(
             select(Beneficiary)
@@ -37,12 +34,12 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         self,
         skip: int = 0,
         limit: int = 20,
-        status: Optional[str] = None,
-        unit_id: Optional[int] = None,
-        referent_id: Optional[int] = None,
-        search: Optional[str] = None,
-        sort: Optional[str] = None,
-    ) -> tuple[List[Beneficiary], int]:
+        status: str | None = None,
+        unit_id: int | None = None,
+        referent_id: int | None = None,
+        search: str | None = None,
+        sort: str | None = None,
+    ) -> tuple[list[Beneficiary], int]:
         """Get all beneficiaries with filtering and pagination."""
         query = (
             select(Beneficiary)
@@ -94,7 +91,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
 
         return beneficiaries, total
 
-    async def get_by_referent(self, referent_id: int) -> List[Beneficiary]:
+    async def get_by_referent(self, referent_id: int) -> list[Beneficiary]:
         """Get beneficiaries by referent ID."""
         result = await self.db.execute(
             select(Beneficiary)
@@ -105,7 +102,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         )
         return list(result.scalars().all())
 
-    async def get_by_unit(self, unit_id: int) -> List[Beneficiary]:
+    async def get_by_unit(self, unit_id: int) -> list[Beneficiary]:
         """Get beneficiaries by unit ID."""
         result = await self.db.execute(
             select(Beneficiary)
@@ -116,7 +113,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         return list(result.scalars().all())
 
     # Medical data operations
-    async def get_medical_data(self, beneficiary_id: int) -> Optional[BeneficiaryMedicalData]:
+    async def get_medical_data(self, beneficiary_id: int) -> BeneficiaryMedicalData | None:
         """Get medical data for a beneficiary."""
         result = await self.db.execute(
             select(BeneficiaryMedicalData)
@@ -150,7 +147,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         return medical_data
 
     # Contact operations
-    async def get_contacts(self, beneficiary_id: int) -> List[Contact]:
+    async def get_contacts(self, beneficiary_id: int) -> list[Contact]:
         """Get contacts for a beneficiary."""
         result = await self.db.execute(
             select(Contact)
@@ -159,7 +156,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         )
         return list(result.scalars().all())
 
-    async def get_contact_by_id(self, contact_id: int) -> Optional[Contact]:
+    async def get_contact_by_id(self, contact_id: int) -> Contact | None:
         """Get contact by ID."""
         result = await self.db.execute(
             select(Contact).where(Contact.id == contact_id)
@@ -193,7 +190,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         self,
         beneficiary_id: int,
         active_only: bool = True,
-    ) -> List[RiskBehavior]:
+    ) -> list[RiskBehavior]:
         """Get risk behaviors for a beneficiary."""
         query = select(RiskBehavior).where(RiskBehavior.beneficiary_id == beneficiary_id)
 
@@ -204,7 +201,7 @@ class BeneficiaryRepository(BaseRepository[Beneficiary]):
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_risk_behavior_by_id(self, risk_id: int) -> Optional[RiskBehavior]:
+    async def get_risk_behavior_by_id(self, risk_id: int) -> RiskBehavior | None:
         """Get risk behavior by ID."""
         result = await self.db.execute(
             select(RiskBehavior).where(RiskBehavior.id == risk_id)

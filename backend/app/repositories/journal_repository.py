@@ -1,19 +1,18 @@
 """Journal repository for database operations."""
 
 from datetime import date, datetime
-from typing import List, Optional
 
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.beneficiary import Beneficiary
 from app.models.journal import (
-    JournalEntry,
     JournalCategory,
+    JournalEntry,
     JournalEntryCategory,
     JournalEntryTag,
 )
-from app.models.beneficiary import Beneficiary
 from app.repositories.base import BaseRepository
 
 
@@ -23,7 +22,7 @@ class JournalRepository(BaseRepository[JournalEntry]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, JournalEntry)
 
-    async def get_by_id_with_relations(self, id: int) -> Optional[JournalEntry]:
+    async def get_by_id_with_relations(self, id: int) -> JournalEntry | None:
         """Get journal entry by ID with all relations loaded."""
         result = await self.db.execute(
             select(JournalEntry)
@@ -40,15 +39,15 @@ class JournalRepository(BaseRepository[JournalEntry]):
         self,
         skip: int = 0,
         limit: int = 20,
-        beneficiary_id: Optional[int] = None,
-        author_id: Optional[int] = None,
-        category_ids: Optional[List[int]] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
-        search: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        unit_id: Optional[int] = None,
-    ) -> tuple[List[JournalEntry], int]:
+        beneficiary_id: int | None = None,
+        author_id: int | None = None,
+        category_ids: list[int] | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        search: str | None = None,
+        tags: list[str] | None = None,
+        unit_id: int | None = None,
+    ) -> tuple[list[JournalEntry], int]:
         """Get all journal entries with filtering and pagination."""
         query = (
             select(JournalEntry)
@@ -109,8 +108,8 @@ class JournalRepository(BaseRepository[JournalEntry]):
         self,
         data: dict,
         author_id: int,
-        category_ids: List[int],
-        tags: List[str],
+        category_ids: list[int],
+        tags: list[str],
     ) -> JournalEntry:
         """Create a new journal entry with categories and tags."""
         entry = JournalEntry(author_id=author_id, **data)
@@ -141,8 +140,8 @@ class JournalRepository(BaseRepository[JournalEntry]):
         self,
         entry: JournalEntry,
         data: dict,
-        category_ids: Optional[List[int]] = None,
-        tags: Optional[List[str]] = None,
+        category_ids: list[int] | None = None,
+        tags: list[str] | None = None,
     ) -> JournalEntry:
         """Update a journal entry."""
         for key, value in data.items():
@@ -186,7 +185,7 @@ class JournalRepository(BaseRepository[JournalEntry]):
         return entry
 
     # Category operations
-    async def get_all_categories(self, active_only: bool = True) -> List[JournalCategory]:
+    async def get_all_categories(self, active_only: bool = True) -> list[JournalCategory]:
         """Get all journal categories."""
         query = select(JournalCategory)
 
@@ -197,7 +196,7 @@ class JournalRepository(BaseRepository[JournalEntry]):
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_tags_for_beneficiary(self, beneficiary_id: int) -> List[str]:
+    async def get_tags_for_beneficiary(self, beneficiary_id: int) -> list[str]:
         """Get all unique tags used for a beneficiary's journal entries."""
         result = await self.db.execute(
             select(func.distinct(JournalEntryTag.tag))
@@ -209,10 +208,10 @@ class JournalRepository(BaseRepository[JournalEntry]):
 
     async def get_recent_entries(
         self,
-        beneficiary_id: Optional[int] = None,
-        unit_id: Optional[int] = None,
+        beneficiary_id: int | None = None,
+        unit_id: int | None = None,
         limit: int = 10,
-    ) -> List[JournalEntry]:
+    ) -> list[JournalEntry]:
         """Get recent journal entries."""
         query = (
             select(JournalEntry)

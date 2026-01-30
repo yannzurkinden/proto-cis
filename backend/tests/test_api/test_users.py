@@ -1,8 +1,6 @@
 """Tests for user management endpoints (/api/v1/users/*)."""
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── Get current user (me) ────────────────────────────────────────────────────
 
@@ -29,9 +27,9 @@ class TestGetMe:
         assert data["unit_id"] == test_unit.id
 
     async def test_get_me_unauthenticated(self, client: AsyncClient):
-        """Unauthenticated returns 403."""
+        """Unauthenticated returns 401."""
         response = await client.get("/api/v1/users/me")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ── List users ───────────────────────────────────────────────────────────────

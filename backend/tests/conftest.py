@@ -1,9 +1,12 @@
 """Pytest configuration and fixtures for CIS backend tests."""
 
 import datetime
-from typing import AsyncGenerator
+import os
+from collections.abc import AsyncGenerator
 
-import pytest
+# Disable rate limiting and other prod middleware for tests
+os.environ["TESTING"] = "true"
+
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
@@ -14,9 +17,8 @@ from app.database import Base, get_db
 from app.main import app
 from app.models import *  # noqa: F403 - Import all models to register them with Base
 from app.models.audit import Notification
-from app.models.beneficiary import Beneficiary, Contact, RiskBehavior
-from app.models.journal import JournalCategory, JournalEntry, JournalEntryCategory, JournalEntryTag
-from app.models.objective import Objective
+from app.models.beneficiary import Beneficiary
+from app.models.journal import JournalCategory
 from app.models.unit import Unit
 from app.models.user import User
 from app.utils.security import create_access_token, get_password_hash
@@ -41,7 +43,7 @@ def _register_sqlite_functions(dbapi_connection, connection_record):
     dbapi_connection.create_function(
         "now",
         0,
-        lambda: datetime.datetime.now(datetime.timezone.utc).strftime(
+        lambda: datetime.datetime.now(datetime.UTC).strftime(
             "%Y-%m-%d %H:%M:%S"
         ),
     )
@@ -345,7 +347,7 @@ async def test_notifications(
     db_session: AsyncSession, msp_user: User
 ) -> list[Notification]:
     """Create several test notifications for *msp_user*."""
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     notifications = []
     for i in range(5):
         n = Notification(

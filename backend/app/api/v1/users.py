@@ -1,6 +1,6 @@
 """User management endpoints."""
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,13 +9,13 @@ from app.database import get_db
 from app.dependencies import get_current_user, require_admin, require_management
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
+from app.schemas.common import PaginatedResponse
 from app.schemas.user import (
     UserCreate,
-    UserUpdate,
-    UserResponse,
     UserMeResponse,
+    UserResponse,
+    UserUpdate,
 )
-from app.schemas.common import PaginatedResponse
 from app.utils.security import get_password_hash, validate_password_strength
 
 router = APIRouter()
@@ -52,9 +52,9 @@ async def list_users(
     current_user: Annotated[User, Depends(require_management)],
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    role: Optional[str] = None,
-    unit_id: Optional[int] = None,
-    is_active: Optional[bool] = None,
+    role: str | None = None,
+    unit_id: int | None = None,
+    is_active: bool | None = None,
 ):
     """List all users with filtering and pagination."""
     user_repo = UserRepository(db)
